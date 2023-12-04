@@ -9,8 +9,6 @@ env:
   playstore_name: Frogobox ID
 
 on:
-  push:
-    branches: [release]
   pull_request:
     branches: [release]
 
