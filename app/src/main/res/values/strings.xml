@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ChatKotlin</string>
+    <string name="nombre_desarrollador">Pedro Martin Aguilera</string>
 </resources>
