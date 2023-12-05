@@ -89,6 +89,8 @@ class RegistroActivity : AppCompatActivity() {
                     hashmap["search"] = hUsername.lowercase()
 
                     hashmap["alias"] = ""
+                    hashmap["phone"] = ""
+                    hashmap["age"] = ""
                     hashmap["status"] = "offline"
                     reference.updateChildren(hashmap)
                         .addOnCompleteListener{task2 ->

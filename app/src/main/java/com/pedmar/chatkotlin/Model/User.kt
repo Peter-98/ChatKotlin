@@ -8,6 +8,8 @@ class User {
     private var image : String = ""
     private var search : String = ""
     private var alias : String = ""
+    private var age : String = ""
+    private var phone : String = ""
 
     constructor()
 
@@ -17,7 +19,9 @@ class User {
         image: String,
         search: String,
         username: String,
-        alias: String
+        alias: String,
+        age: String,
+        phone: String
     ) {
         this.uid = uid
         this.username = username
@@ -25,6 +29,8 @@ class User {
         this.alias = alias
         this.image = image
         this.search = search
+        this.age = age
+        this.phone = phone
     }
 
     //getters y setters
@@ -74,5 +80,21 @@ class User {
 
     fun setAlias(alias : String){
         this.alias = alias
+    }
+
+    fun getAge() : String?{
+        return age
+    }
+
+    fun setAge(age : String){
+        this.age = age
+    }
+
+    fun getPhone() : String?{
+        return phone
+    }
+
+    fun setPhone(phone : String){
+        this.phone = phone
     }
 }
