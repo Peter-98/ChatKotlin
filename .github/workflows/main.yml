@@ -49,6 +49,9 @@ jobs:
 
       - name: List files in the directory
         run: ls -R
+        
+      - name: Show content of google-services.json
+        run: cat app/google-services.json
 
       # Run Tests Build
       - name: Run gradle tests
