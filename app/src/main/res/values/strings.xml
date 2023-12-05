@@ -22,4 +22,7 @@
 
     <string name="username">Username</string>
 
+    <string name="Item_username">Username</string>
+    <string name="Item_user_email">User email</string>
+
 </resources>
