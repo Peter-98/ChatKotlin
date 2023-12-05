@@ -9,8 +9,8 @@ env:
   playstore_name: Frogobox ID
 
 on:
-  pull_request:
-    branches: [release]
+  push:
+    branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -40,15 +40,6 @@ jobs:
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
-        
-      - name: Set up Google Services JSON
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
-
-      - name: Debug secret content
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}"
-
-      - name: List files in the directory
-        run: ls -R
         
       - name: Show content of google-services.json
         run: cat app/google-services.json
