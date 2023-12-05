@@ -1,4 +1,17 @@
 <resources>
     <string name="app_name">ChatKotlin</string>
     <string name="nombre_desarrollador">Pedro Martin Aguilera</string>
+
+    <!--- boton inicial -->
+    <string name="Btn_ir_sign_in">Sign in</string>
+    <string name="Btn_ir_login">Log in</string>
+
+
+    <!--- registro edit text -->
+    <string name="R_Et_username">Username</string>
+    <string name="R_Et_email">Email</string>
+    <string name="R_Et_password">Password</string>
+    <string name="R_Et_r_password">Repeat password</string>
+    <string name="Btn_sign_in">Sign in</string>
+
 </resources>
