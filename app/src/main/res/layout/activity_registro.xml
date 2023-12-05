@@ -14,36 +14,80 @@
         android:orientation="vertical"
         android:gravity="center"
         android:padding="10dp">
-        <EditText
-            android:id="@+id/R_Et_username"
-            android:hint="@string/R_Et_username"
-            android:inputType="text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
 
-        <EditText
-            android:id="@+id/R_Et_email"
-            android:hint="@string/R_Et_email"
-            android:layout_marginTop="10dp"
-            android:inputType="textEmailAddress"
+        <!-- Username -->
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/R_Et_password"
-            android:hint="@string/R_Et_password"
-            android:layout_marginTop="10dp"
-            android:inputType="textPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            <EditText
+                android:id="@+id/R_Et_username"
+                android:hint="@string/R_Et_username"
+                android:inputType="textPersonName|textCapWords"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_nombre_usuario"
+                android:padding="20dp"
+                android:drawablePadding="10dp"/>
 
-        <EditText
-            android:id="@+id/R_Et_r_password"
-            android:hint="@string/R_Et_r_password"
-            android:layout_marginTop="10dp"
-            android:inputType="textPassword"
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email -->
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/R_Et_email"
+                android:hint="@string/R_Et_email"
+                android:layout_marginTop="10dp"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_email"
+                android:padding="20dp"
+                android:drawablePadding="10dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true">
+
+
+            <EditText
+                android:id="@+id/R_Et_password"
+                android:hint="@string/R_Et_password"
+                android:layout_marginTop="10dp"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_password"
+                android:padding="20dp"
+                android:drawablePadding="10dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- R password -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true">
+
+            <EditText
+                android:id="@+id/R_Et_r_password"
+                android:hint="@string/R_Et_r_password"
+                android:layout_marginTop="10dp"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_password"
+                android:padding="20dp"
+                android:drawablePadding="10dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/Btn_sign_in"
