@@ -20,4 +20,6 @@
     <string name="L_Et_password">Password</string>
     <string name="Btn_login">Log in</string>
 
+    <string name="username">Username</string>
+
 </resources>

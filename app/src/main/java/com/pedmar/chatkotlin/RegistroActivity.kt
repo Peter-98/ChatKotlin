@@ -24,7 +24,7 @@ class RegistroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registro)
-        supportActionBar!!.title = "Sign In"
+        //supportActionBar!!.title = "Sign In"
         InicializarVariables()
 
         Btn_sign_in.setOnClickListener{
@@ -88,6 +88,8 @@ class RegistroActivity : AppCompatActivity() {
                     hashmap["image"] = ""
                     hashmap["search"] = hUsername.lowercase()
 
+                    hashmap["alias"] = ""
+                    hashmap["status"] = "offline"
                     reference.updateChildren(hashmap)
                         .addOnCompleteListener{task2 ->
                             if(task2.isSuccessful){
