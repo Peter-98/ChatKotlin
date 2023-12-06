@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin.Model
+package com.pedmar.chatkotlin.model
 
 class User {
 

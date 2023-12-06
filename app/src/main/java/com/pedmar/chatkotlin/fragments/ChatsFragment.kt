@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin.Fragments
+package com.pedmar.chatkotlin.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

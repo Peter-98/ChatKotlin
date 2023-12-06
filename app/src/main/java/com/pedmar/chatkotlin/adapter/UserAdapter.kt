@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin.Adapter
+package com.pedmar.chatkotlin.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.pedmar.chatkotlin.Model.User
+import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.R
 
 class UserAdapter (context: Context, usersList: List<User>) : RecyclerView.Adapter<UserAdapter.ViewHolder?>(){
@@ -48,6 +48,7 @@ class UserAdapter (context: Context, usersList: List<User>) : RecyclerView.Adapt
        val user : User = usersList[position]
         holder.username.text = user.getUsername()
         holder.userEmail.text = user.getEmail()
+
         //Mientras se carga la imagen se mostrara ic_item_user
         Glide.with(context).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(holder.userImage)
     }
