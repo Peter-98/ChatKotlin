@@ -7,9 +7,25 @@
     android:layout_height="match_parent"
     tools:context=".fragments.UsersFragment">
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/TIL_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/Et_search_user"
+            android:hint="@string/Et_search_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RV_users"
         tools:listitem="@layout/item_user"
+        android:layout_below="@+id/TIL_search"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

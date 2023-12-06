@@ -20,6 +20,7 @@ import com.google.firebase.database.*
 import com.pedmar.chatkotlin.fragments.ChatsFragment
 import com.pedmar.chatkotlin.fragments.UsersFragment
 import com.pedmar.chatkotlin.model.User
+import com.pedmar.chatkotlin.profile.ProfileActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -81,24 +82,24 @@ class MainActivity : AppCompatActivity() {
 
     class ViewPagerAdapter(fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager) {
 
-        private val listaFragmentos : MutableList<Fragment> = ArrayList()
-        private val listaTitulos : MutableList<String> = ArrayList()
+        private val fragmentList : MutableList<Fragment> = ArrayList()
+        private val titlesList : MutableList<String> = ArrayList()
         override fun getCount(): Int {
-          return listaFragmentos.size
+          return fragmentList.size
         }
 
         override fun getItem(position: Int): Fragment {
-           return listaFragmentos[position]
+           return fragmentList[position]
         }
 
         //Cambiar nombre de la stat
         override fun getPageTitle(position: Int): CharSequence {
-            return listaTitulos[position]
+            return titlesList[position]
         }
 
         fun addItem(fragment: Fragment, titulo: String){
-            listaFragmentos.add(fragment)
-            listaTitulos.add(titulo)
+            fragmentList.add(fragment)
+            titlesList.add(titulo)
         }
     }
 
@@ -109,9 +110,18 @@ class MainActivity : AppCompatActivity() {
         return true;
     }
 
-    //Seleccionar menu cerrar sesion
+    //Seleccionar menu lateral
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
+            R.id.menu_profile->{
+                val intent = Intent(applicationContext, ProfileActivity::class.java)
+                startActivity(intent)
+                return true
+            }
+            R.id.menu_about->{
+                Toast.makeText(applicationContext, "About...", Toast.LENGTH_SHORT).show()
+                return true
+            }
             R.id.menu_exit->{
                 FirebaseAuth.getInstance().signOut()
                 val intent = Intent(this@MainActivity, Inicio::class.java)
