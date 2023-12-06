@@ -33,10 +33,6 @@ android {
     }
 }
 
-ext {
-    kotlin_version = '1.7.1' // Define la versión de Kotlin aquí
-}
-
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
