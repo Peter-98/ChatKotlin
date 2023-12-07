@@ -20,8 +20,8 @@ import java.io.ByteArrayOutputStream
 
 class EditImageProfileActivity : AppCompatActivity() {
 
-    private lateinit var BtnSelectImage: Button
-    private lateinit var UpdateImageProfile: ImageView
+    private lateinit var btnSelectImage: Button
+    private lateinit var updateImageProfile: ImageView
 
     private lateinit var firebaseAuth : FirebaseAuth
     private lateinit var progressDialog : ProgressDialog
@@ -35,8 +35,8 @@ class EditImageProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_image_profile)
 
-        BtnSelectImage = findViewById(R.id.BtnSelectImage)
-        UpdateImageProfile = findViewById(R.id.UpdateImageProfile)
+        btnSelectImage = findViewById(R.id.BtnSelectImage)
+        updateImageProfile = findViewById(R.id.UpdateImageProfile)
 
         progressDialog = ProgressDialog(this@EditImageProfileActivity)
         progressDialog.setTitle("Please wait")
@@ -52,10 +52,10 @@ class EditImageProfileActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
             // Muestra el bitmap en la imagen
-            UpdateImageProfile.setImageBitmap(bitmap)
+            updateImageProfile.setImageBitmap(bitmap)
         }
 
-        BtnSelectImage.setOnClickListener {
+        btnSelectImage.setOnClickListener {
             showImageSelectionDialog()
         }
     }
@@ -77,12 +77,13 @@ class EditImageProfileActivity : AppCompatActivity() {
 
     private fun dispatchTakePictureIntent() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (takePictureIntent.resolveActivity(packageManager) != null) {
+        try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-        } else {
-            Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(applicationContext, "Camera Not Available", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun dispatchPickImageIntent() {
         val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -97,13 +98,13 @@ class EditImageProfileActivity : AppCompatActivity() {
             when (requestCode) {
                 REQUEST_IMAGE_CAPTURE -> {
                     val imageBitmap = data?.extras?.get("data") as Bitmap
-                    UpdateImageProfile.setImageBitmap(imageBitmap)
+                    updateImageProfile.setImageBitmap(imageBitmap)
                     updateByteArray(imageBitmap)
                 }
                 REQUEST_IMAGE_PICK -> {
                     val selectedImage = data?.data
                     val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
-                    UpdateImageProfile.setImageBitmap(imageBitmap)
+                    updateImageProfile.setImageBitmap(imageBitmap)
                     updateByteArray(imageBitmap)
                 }
             }

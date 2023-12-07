@@ -41,7 +41,10 @@
 
     <!-- Edit image Profile-->
     <string name="Btn_select_image">Select image</string>
-    <string name="Btn_update_image">Update image</string>
+
+    <!--Chat -->
+    <string name="C_username">Username</string>
+    <string name="C_message">Write a message</string>
 
 
 </resources>

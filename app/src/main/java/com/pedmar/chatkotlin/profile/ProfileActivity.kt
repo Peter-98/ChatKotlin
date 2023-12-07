@@ -28,7 +28,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var age : EditText
     private lateinit var phone : EditText
     private lateinit var btnSave : Button
-    private lateinit var editImage : ImageView
+    private lateinit var editBanner : ImageView
 
 
     var user : FirebaseUser?= null
@@ -43,7 +43,7 @@ class ProfileActivity : AppCompatActivity() {
             updateData()
         }
 
-        editImage.setOnClickListener{
+        image.setOnClickListener{
             val intent = Intent(applicationContext, EditImageProfileActivity::class.java)
 
             // Obtén el Drawable de la ImageView
@@ -74,7 +74,7 @@ class ProfileActivity : AppCompatActivity() {
         age = findViewById(R.id.P_age)
         phone = findViewById(R.id.P_phone)
         btnSave = findViewById(R.id.Btn_save)
-        editImage = findViewById(R.id.P_Edit_image)
+        editBanner = findViewById(R.id.P_Edit_banner)
 
         user = FirebaseAuth.getInstance().currentUser
         reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
