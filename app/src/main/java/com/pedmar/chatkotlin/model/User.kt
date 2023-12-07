@@ -7,7 +7,8 @@ class User {
     private var email : String = ""
     private var image : String = ""
     private var search : String = ""
-    private var alias : String = ""
+    private var name : String = ""
+    private var surnames : String = ""
     private var age : String = ""
     private var phone : String = ""
 
@@ -19,14 +20,16 @@ class User {
         image: String,
         search: String,
         username: String,
-        alias: String,
+        name: String,
+        surnames: String,
         age: String,
         phone: String
     ) {
         this.uid = uid
         this.username = username
         this.email = email
-        this.alias = alias
+        this.name = name
+        this.surnames = surnames
         this.image = image
         this.search = search
         this.age = age
@@ -74,12 +77,20 @@ class User {
         this.search = search
     }
 
-    fun getAlias() : String?{
-        return alias
+    fun getSurnames() : String?{
+        return surnames
     }
 
-    fun setAlias(alias : String){
-        this.alias = alias
+    fun setSurnames(surnames : String){
+        this.surnames = surnames
+    }
+
+    fun getName() : String?{
+        return name
+    }
+
+    fun setName(name : String){
+        this.name = name
     }
 
     fun getAge() : String?{

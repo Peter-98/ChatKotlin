@@ -25,14 +25,14 @@ class RegistroActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registro)
         //supportActionBar!!.title = "Sign In"
-        InicializarVariables()
+        initializeVariables()
 
         Btn_sign_in.setOnClickListener{
             ValidarDatos()
         }
     }
 
-    private fun InicializarVariables(){
+    private fun initializeVariables(){
         R_Et_username = findViewById(R.id.R_Et_username)
         R_Et_email = findViewById(R.id.R_Et_email)
         R_Et_password = findViewById(R.id.R_Et_password)
@@ -88,7 +88,8 @@ class RegistroActivity : AppCompatActivity() {
                     hashmap["image"] = ""
                     hashmap["search"] = hUsername.lowercase()
 
-                    hashmap["alias"] = ""
+                    hashmap["name"] = ""
+                    hashmap["surnames"] = ""
                     hashmap["phone"] = ""
                     hashmap["age"] = ""
                     hashmap["status"] = "offline"

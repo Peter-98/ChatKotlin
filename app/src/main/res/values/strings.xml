@@ -29,8 +29,15 @@
     <string name="Item_user_email">User email</string>
 
     <string name="Et_search_user">Search user</string>
-    
-    
+
+    <!-- User Profile-->
+    <string name="P_username">Username</string>
+    <string name="P_email">Email</string>
+    <string name="P_phone">Phone number</string>
+    <string name="P_age">Age</string>
+    <string name="P_name">Name</string>
+    <string name="P_surnames">Surnames</string>
+    <string name="Btn_save">Save</string>
 
 
 </resources>
