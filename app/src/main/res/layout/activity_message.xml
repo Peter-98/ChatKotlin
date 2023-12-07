@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/imageProfileChat"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@drawable/ic_image_chat"
             android:scaleType="centerCrop"
             android:layout_marginStart="10dp"/>
@@ -60,7 +60,7 @@
 
         <!-- Escribir mensaje-->
         <EditText
-            android:id="@+id/edMessage"
+            android:id="@+id/etMessage"
             android:hint="@string/C_message"
             android:layout_toEndOf="@+id/ibInclude"
             android:layout_centerVertical="true"

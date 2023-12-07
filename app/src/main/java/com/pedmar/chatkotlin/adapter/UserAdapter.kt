@@ -1,15 +1,18 @@
 package com.pedmar.chatkotlin.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.R
+import com.pedmar.chatkotlin.chat.MessageActivity
 
 class UserAdapter (context: Context, usersList: List<User>) : RecyclerView.Adapter<UserAdapter.ViewHolder?>(){
 
@@ -51,5 +54,12 @@ class UserAdapter (context: Context, usersList: List<User>) : RecyclerView.Adapt
 
         //Mientras se carga la imagen se mostrara ic_item_user
         Glide.with(context).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(holder.userImage)
+
+        holder.itemView.setOnClickListener{
+            val intent = Intent(context, MessageActivity::class.java)
+            intent.putExtra("user.uid", user.getUid())
+            Toast.makeText(context, "The selected user is: "+user.getUsername(), Toast.LENGTH_SHORT).show()
+            context.startActivity(intent)
+        }
     }
 }
