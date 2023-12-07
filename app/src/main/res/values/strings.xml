@@ -17,7 +17,7 @@
     <string name="menu_exit">Log out</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_about">About</string>
-    
+
 
     <string name="L_Et_email">Email</string>
     <string name="L_Et_password">Password</string>
@@ -38,6 +38,10 @@
     <string name="P_name">Name</string>
     <string name="P_surnames">Surnames</string>
     <string name="Btn_save">Save</string>
+
+    <!-- Edit image Profile-->
+    <string name="Btn_select_image">Select image</string>
+    <string name="Btn_update_image">Update image</string>
 
 
 </resources>

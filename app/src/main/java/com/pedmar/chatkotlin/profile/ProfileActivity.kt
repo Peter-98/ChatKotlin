@@ -1,5 +1,8 @@
 package com.pedmar.chatkotlin.profile
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -13,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.User
+import java.io.ByteArrayOutputStream
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -24,6 +28,8 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var age : EditText
     private lateinit var phone : EditText
     private lateinit var btnSave : Button
+    private lateinit var editImage : ImageView
+
 
     var user : FirebaseUser?= null
     var reference : DatabaseReference?=null
@@ -36,6 +42,27 @@ class ProfileActivity : AppCompatActivity() {
         btnSave.setOnClickListener{
             updateData()
         }
+
+        editImage.setOnClickListener{
+            val intent = Intent(applicationContext, EditImageProfileActivity::class.java)
+
+            // Obtén el Drawable de la ImageView
+            val drawable = image.drawable
+
+            // Convierte el Drawable a un Bitmap si es posible
+            if (drawable is BitmapDrawable) {
+                val bitmap = drawable.bitmap
+
+                // Convierte el Bitmap a ByteArray
+                val stream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                val byteArray = stream.toByteArray()
+
+                // Pasa el ByteArray a la actividad
+                intent.putExtra("imageByteArray", byteArray)
+            }
+            startActivity(intent)
+        }
     }
 
     private fun initializeVariables(){
@@ -47,6 +74,7 @@ class ProfileActivity : AppCompatActivity() {
         age = findViewById(R.id.P_age)
         phone = findViewById(R.id.P_phone)
         btnSave = findViewById(R.id.Btn_save)
+        editImage = findViewById(R.id.P_Edit_image)
 
         user = FirebaseAuth.getInstance().currentUser
         reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
