@@ -3,8 +3,8 @@
     <string name="nombre_desarrollador">Pedro Martin Aguilera</string>
 
     <!--- boton inicial -->
-    <string name="Btn_ir_sign_in">Sign in</string>
-    <string name="Btn_ir_login">Log in</string>
+    <string name="Btn_ir_login">Log in with email</string>
+    <string name="Btn_ir_login_google">Log in with Google</string>
 
 
     <!--- registro edit text -->
@@ -22,6 +22,8 @@
     <string name="L_Et_email">Email</string>
     <string name="L_Et_password">Password</string>
     <string name="Btn_login">Log in</string>
+    <string name="TXT_no_account">You do not have an account?</string>
+    <string name="TXT_ir_sign_up">Sign up</string>
 
     <string name="username">Username</string>
 

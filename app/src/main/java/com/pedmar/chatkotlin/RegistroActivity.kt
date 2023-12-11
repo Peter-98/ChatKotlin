@@ -93,6 +93,7 @@ class RegistroActivity : AppCompatActivity() {
                     hashmap["phone"] = ""
                     hashmap["age"] = ""
                     hashmap["status"] = "offline"
+                    hashmap["provider"] = "Email"
                     reference.updateChildren(hashmap)
                         .addOnCompleteListener{task2 ->
                             if(task2.isSuccessful){
