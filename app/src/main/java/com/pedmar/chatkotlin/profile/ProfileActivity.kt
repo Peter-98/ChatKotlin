@@ -1,5 +1,6 @@
 package com.pedmar.chatkotlin.profile
 
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -11,9 +12,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.hbb20.CountryCodePicker
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.User
 import java.io.ByteArrayOutputStream
@@ -26,13 +29,18 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var name : EditText
     private lateinit var surnames : EditText
     private lateinit var age : EditText
-    private lateinit var phone : EditText
+    private lateinit var phone : TextView
     private lateinit var btnSave : Button
     private lateinit var editBanner : ImageView
-
+    private lateinit var provider : TextView
+    private lateinit var editPhone : ImageView
 
     var user : FirebaseUser?= null
     var reference : DatabaseReference?=null
+
+    private var phoneCode = ""
+    private var phoneNumber = ""
+    private var phoneCodeNumber = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +71,45 @@ class ProfileActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+
+        editPhone.setOnClickListener{
+            setNumberPhone()
+        }
+    }
+
+    private fun setNumberPhone() {
+
+        /*Declarar vistas del cuadro de dialogo*/
+        val setPhoneNumber : EditText
+        val setPhoneCode : CountryCodePicker
+        val btnAccept : MaterialButton
+
+        val dialog = Dialog(this@ProfileActivity)
+
+        /*Realizar conexion con el diseño*/
+        dialog.setContentView(R.layout.dialog_set_phone)
+
+        /*Inicializar las vistas*/
+        setPhoneNumber = dialog.findViewById(R.id.setPhone)
+        setPhoneCode = dialog.findViewById(R.id.codeSelect)
+        btnAccept = dialog.findViewById(R.id.Btn_accept_phone)
+
+        /*Asignar el evento al boton*/
+        btnAccept.setOnClickListener{
+            phoneCode = setPhoneCode.selectedCountryCodeWithPlus
+            phoneNumber = setPhoneNumber.text.toString().trim()
+            phoneCodeNumber = phoneCode + phoneNumber
+            if(phoneNumber.isEmpty()){
+                Toast.makeText(applicationContext, "Enter a phone number",Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }else{
+                phone.text =  phoneCodeNumber
+                dialog.dismiss()
+            }
+        }
+
+        dialog.show()
+        dialog.setCanceledOnTouchOutside(false)
     }
 
     private fun initializeVariables(){
@@ -75,6 +122,8 @@ class ProfileActivity : AppCompatActivity() {
         phone = findViewById(R.id.P_phone)
         btnSave = findViewById(R.id.Btn_save)
         editBanner = findViewById(R.id.P_Edit_banner)
+        provider = findViewById(R.id.P_provider)
+        editPhone = findViewById(R.id.edit_phone)
 
         user = FirebaseAuth.getInstance().currentUser
         reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
@@ -94,8 +143,8 @@ class ProfileActivity : AppCompatActivity() {
                     surnames.setText(user!!.getSurnames())
                     age.setText(user!!.getAge())
                     phone.setText(user!!.getPhone())
+                    provider.text = user!!.getProvider()
                     Glide.with(applicationContext).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(image)
-
                 }
             }
             override fun onCancelled(error: DatabaseError) {

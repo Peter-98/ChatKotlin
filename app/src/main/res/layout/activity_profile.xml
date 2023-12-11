@@ -77,8 +77,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/P_provider_txt"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <androidx.cardview.widget.CardView
+                    android:padding="0.5dp"
+                    android:backgroundTint="#48c980"
+                    android:layout_marginStart="5dp"
+                    app:cardCornerRadius="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/P_provider"
+                        android:textSize="17sp"
+                        android:padding="10dp"
+                        android:textStyle="bold"
+                        android:text="@string/P_provider"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.cardview.widget.CardView>
+
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -120,19 +157,29 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_marginTop="5dp"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <EditText
-                    android:id="@+id/P_phone"
-                    android:hint="@string/P_phone"
-                    android:inputType="number"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    <TextView
+                        android:id="@+id/P_phone"
+                        android:text="@string/P_phone"
+                        android:textSize="18sp"
+                        android:gravity="center"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:id="@+id/edit_phone"
+                        android:src="@drawable/phone"
+                        android:layout_marginStart="15dp"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+
 
             <Button
                 android:id="@+id/Btn_save"

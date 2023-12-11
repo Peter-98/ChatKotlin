@@ -39,7 +39,12 @@
     <string name="P_age">Age</string>
     <string name="P_name">Name</string>
     <string name="P_surnames">Surnames</string>
+    <string name="P_provider_txt">Provider : </string>
+    <string name="P_provider"> -- </string>
     <string name="Btn_save">Save</string>
+
+    <string name="setPhone">Write your number phone</string>
+    <string name="Btn_accept_phone">Accept</string>
 
     <!-- Edit image Profile-->
     <string name="Btn_select_image">Select image</string>

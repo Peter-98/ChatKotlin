@@ -12,6 +12,7 @@ class User {
     private var age : String = ""
     private var phone : String = ""
     private var status : String = ""
+    private var provider : String = ""
 
     constructor()
 
@@ -25,7 +26,8 @@ class User {
         surnames: String,
         age: String,
         phone: String,
-        status: String
+        status: String,
+        provider: String
     ) {
         this.uid = uid
         this.username = username
@@ -37,6 +39,7 @@ class User {
         this.age = age
         this.phone = phone
         this.status = status
+        this.provider = provider
     }
 
     //getters y setters
@@ -118,5 +121,13 @@ class User {
 
     fun setStatus(status : String){
         this.status = status
+    }
+
+    fun getProvider() : String?{
+        return provider
+    }
+
+    fun setProvider(provider : String){
+        this.provider = provider
     }
 }
