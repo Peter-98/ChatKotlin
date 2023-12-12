@@ -1,6 +1,8 @@
 package com.pedmar.chatkotlin.profile
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,6 +10,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.firebase.database.*
 import com.pedmar.chatkotlin.R
@@ -35,7 +39,11 @@ class VisitedProfileActivity : AppCompatActivity() {
         getUserData()
 
         btnCall.setOnClickListener{
-            makeCall()
+            if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED){
+                makeCall()
+            }else{
+                requestCallPhonePermission.launch(Manifest.permission.CALL_PHONE)
+            }
         }
     }
 
@@ -49,6 +57,15 @@ class VisitedProfileActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
+    private val requestCallPhonePermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                makeCall()
+            }else{
+                Toast.makeText(applicationContext, "Permission to make phone calls has not been granted",Toast.LENGTH_SHORT).show()
+            }
+        }
 
     private fun getUid() {
         intent = intent
