@@ -14,14 +14,16 @@ import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.chat.MessageActivity
 
-class UserAdapter (context: Context, usersList: List<User>) : RecyclerView.Adapter<UserAdapter.ViewHolder?>(){
+class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean) : RecyclerView.Adapter<UserAdapter.ViewHolder?>(){
 
     private val context : Context
     private val usersList : List<User>
+    private val viewedChat : Boolean
 
     init{
         this.context = context
         this.usersList = usersList
+        this.viewedChat = viewedChat
     }
 
     class ViewHolder(itemView : View):RecyclerView.ViewHolder(itemView){

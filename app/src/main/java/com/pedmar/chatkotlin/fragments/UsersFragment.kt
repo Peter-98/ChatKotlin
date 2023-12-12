@@ -73,7 +73,7 @@ class UsersFragment : Fragment() {
                         }
                     }
                     //Pasar la lista al adaptador
-                    userAdapter = UserAdapter(context!!, userList!!)
+                    userAdapter = UserAdapter(context!!, userList!!, false)
 
                     //Seteamos el adaptador al recycleView
                     rvUsers!!.adapter = userAdapter
@@ -106,7 +106,7 @@ class UsersFragment : Fragment() {
                 }
 
                 //Pasar la lista al adaptador
-                userAdapter = UserAdapter(context!!, userList!!)
+                userAdapter = UserAdapter(context!!, userList!!, false)
 
                 //Seteamos el adaptador al recycleView
                 rvUsers!!.adapter = userAdapter
