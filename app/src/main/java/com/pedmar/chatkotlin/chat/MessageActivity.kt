@@ -6,6 +6,9 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Adapter
 import android.widget.EditText
 import android.widget.ImageButton
@@ -16,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -32,6 +36,7 @@ import com.pedmar.chatkotlin.adapter.ChatAdapter
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.profile.EditImageProfileActivity
+import com.pedmar.chatkotlin.profile.VisitedProfileActivity
 
 class MessageActivity : AppCompatActivity() {
 
@@ -78,7 +83,7 @@ class MessageActivity : AppCompatActivity() {
 
     private fun getUid(){
         intent = intent
-        uidUserSelected = intent.getStringExtra("user.uid").toString()
+        uidUserSelected = intent.getStringExtra("userUid").toString()
     }
 
     private fun sendMessage(uidIssuer: String, uidReceiver: String, message: String) {
@@ -185,6 +190,11 @@ class MessageActivity : AppCompatActivity() {
     }
 
     private fun initializeVariables(){
+
+        val toolbar : Toolbar = findViewById(R.id.toolbarChat)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+
         etMessage = findViewById(R.id.etMessage)
         ibSend = findViewById(R.id.iBSend)
         imageProfileChat = findViewById(R.id.imageProfileChat)
@@ -293,5 +303,22 @@ class MessageActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         reference!!.removeEventListener(seenListener!!)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater : MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_visit_profile, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.menu_visit->{
+                val intent = Intent(applicationContext, VisitedProfileActivity::class.java)
+                intent.putExtra("uid", uidUserSelected)
+                startActivity(intent)
+                return true
+            }else -> super.onOptionsItemSelected(item)
+        }
     }
 }

@@ -59,7 +59,9 @@ class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean
 
         holder.itemView.setOnClickListener{
             val intent = Intent(context, MessageActivity::class.java)
-            intent.putExtra("user.uid", user.getUid())
+
+            //Se envia el uid del usuario
+            intent.putExtra("userUid", user.getUid())
             Toast.makeText(context, "The selected user is: "+user.getUsername(), Toast.LENGTH_SHORT).show()
             context.startActivity(intent)
         }

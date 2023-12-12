@@ -49,22 +49,11 @@ class MainActivity : AppCompatActivity() {
         val tabLayout : TabLayout = findViewById(R.id.TabLayoutMain)
         val viewPager : ViewPager = findViewById(R.id.ViewPagerMain)
 
-        //Inicializar adaptador
-        /*val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-
-        //Agregar los fragmentos al adaptador
-        viewPagerAdapter.addItem(UsersFragment(), "Users")
-        viewPagerAdapter.addItem(ChatsFragment(), "Chats")
-
-        //Setear el adaptador al viewPager
-        viewPager.adapter = viewPagerAdapter
-
-        //Agregar las stats
-        tabLayout.setupWithViewPager(viewPager)*/
-
         val ref = FirebaseDatabase.getInstance().reference.child("Chats")
         ref.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
+
+                //Inicializar adaptador
                 val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
                 var countUnreadMessage = 0
                 for (dataSnapshot in snapshot.children){
@@ -73,13 +62,18 @@ class MainActivity : AppCompatActivity() {
                         countUnreadMessage+=1
                     }
                 }
+
+                //Agregar los fragmentos al adaptador
                 if (countUnreadMessage == 0){
                     viewPagerAdapter.addItem(ChatsFragment(), "Chats")
                 }else{
                     viewPagerAdapter.addItem(ChatsFragment(), "[$countUnreadMessage] Chats")
                 }
                 viewPagerAdapter.addItem(UsersFragment(), "Users")
+
+                //Setear el adaptador al viewPager
                 viewPager.adapter = viewPagerAdapter
+                //Agregar las stats
                 tabLayout.setupWithViewPager(viewPager)
             }
 

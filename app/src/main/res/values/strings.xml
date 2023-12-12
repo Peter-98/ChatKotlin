@@ -17,6 +17,7 @@
     <string name="menu_exit">Log out</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_about">About</string>
+    <string name="menu_visit">View profile</string>
 
 
     <string name="L_Et_email">Email</string>
@@ -58,6 +59,26 @@
     <!--Chat -->
     <string name="C_username">Username</string>
     <string name="C_message">Write a message</string>
+
+    <!--Perfil visitado -->
+    <string name="PV_profile">User profile</string>
+    <string name="PV_username">Username</string>
+    <string name="PV_email">Email</string>
+    <string name="PV_uid_txt">Identifier: </string>
+    <string name="PV_uid">Uid</string>
+
+    <string name="PV_name_txt">Name: </string>
+    <string name="PV_name"> -- </string>
+    <string name="PV_surnames_txt">Surnames: </string>
+    <string name="PV_surnames"> -- </string>
+    <string name="PV_phone_txt">Phone number: </string>
+    <string name="PV_phone"> -- </string>
+    <string name="PV_age_txt">Age: </string>
+    <string name="PV_age"> -- </string>
+    <string name="PV_provider_txt">Provider: </string>
+    <string name="PV_provider"> -- </string>
+
+    <string name="Btn_call"> Call </string>
 
     <!-- Item chat-->
     <string name="TXT_see_message">Hi, how are u?</string>
