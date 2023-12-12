@@ -47,6 +47,9 @@ class MessageActivity : AppCompatActivity() {
     var chatAdapter : ChatAdapter ?= null
     var chatList : List<Chat> ?= null
 
+    var reference : DatabaseReference ?= null
+    var seenListener : ValueEventListener ?= null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message)
@@ -67,6 +70,8 @@ class MessageActivity : AppCompatActivity() {
                 etMessage.setText("")
             }
         }
+
+        viewedMessage(uidUserSelected)
     }
 
 
@@ -132,6 +137,25 @@ class MessageActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
 
+        })
+    }
+
+    private fun viewedMessage(userUid : String){
+        reference = FirebaseDatabase.getInstance().reference.child("Chats")
+        seenListener = reference!!.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (dataSnapshot in snapshot.children){
+                    val chat = dataSnapshot.getValue(Chat::class.java)
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getIssuer().equals(userUid)){
+                        val hashMap = HashMap<String, Any>()
+                        hashMap["viewed"] = true
+                        dataSnapshot.ref.updateChildren(hashMap)
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
         })
     }
 
@@ -265,4 +289,9 @@ class MessageActivity : AppCompatActivity() {
         }
     }
 
+    //Detiene la tarea de actualizar viewed de false a true
+    override fun onPause() {
+        super.onPause()
+        reference!!.removeEventListener(seenListener!!)
+    }
 }

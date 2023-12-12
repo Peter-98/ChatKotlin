@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.pedmar.chatkotlin.fragments.ChatsFragment
 import com.pedmar.chatkotlin.fragments.UsersFragment
+import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.profile.ProfileActivity
 
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val viewPager : ViewPager = findViewById(R.id.ViewPagerMain)
 
         //Inicializar adaptador
-        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+        /*val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
 
         //Agregar los fragmentos al adaptador
         viewPagerAdapter.addItem(UsersFragment(), "Users")
@@ -59,7 +60,32 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = viewPagerAdapter
 
         //Agregar las stats
-        tabLayout.setupWithViewPager(viewPager)
+        tabLayout.setupWithViewPager(viewPager)*/
+
+        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
+        ref.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+                var countUnreadMessage = 0
+                for (dataSnapshot in snapshot.children){
+                    val chat = dataSnapshot.getValue(Chat::class.java)
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isViewed()){
+                        countUnreadMessage+=1
+                    }
+                }
+                if (countUnreadMessage == 0){
+                    viewPagerAdapter.addItem(ChatsFragment(), "Chats")
+                }else{
+                    viewPagerAdapter.addItem(ChatsFragment(), "[$countUnreadMessage] Chats")
+                }
+                viewPagerAdapter.addItem(UsersFragment(), "Users")
+                viewPager.adapter = viewPagerAdapter
+                tabLayout.setupWithViewPager(viewPager)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
     }
 
     fun ObtenerDato(){

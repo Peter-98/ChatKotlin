@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.RelativeLayout.LayoutParams
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -81,6 +83,29 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
         }else{
             /* Mensaje contiene texto*/
             holder.seeMessage!!.text = chat.getMessage()
+        }
+
+        //Mensaje enviado y visto
+        if(position == chatList.size-1){
+           if(chat.isViewed()){
+               holder.seenMessage!!.text = "Viewed"
+               if(chat.getMessage().equals("Submitted image") && !chat.getUrl().equals("")){
+                   val lp : RelativeLayout.LayoutParams = holder.seenMessage!!.layoutParams as LayoutParams
+                   //Establecemos la posicion del mensaje de visto
+                   lp!!.setMargins(0,245,10,0)
+                   holder.seenMessage!!.layoutParams = lp
+               }
+           }else{
+               holder.seenMessage!!.text = "Sent"
+               if(chat.getMessage().equals("Submitted image") && !chat.getUrl().equals("")){
+                   val lp : RelativeLayout.LayoutParams = holder.seenMessage!!.layoutParams as LayoutParams
+                   //Establecemos la posicion del mensaje de visto
+                   lp!!.setMargins(0,245,10,0)
+                   holder.seenMessage!!.layoutParams = lp
+               }
+           }
+        }else{
+            holder.seenMessage!!.visibility = View.GONE
         }
     }
 
