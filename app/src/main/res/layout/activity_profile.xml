@@ -113,6 +113,14 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Btn_verify"
+                android:text="@string/Btn_verify"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginTop="5dp"

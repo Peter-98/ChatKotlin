@@ -1,5 +1,6 @@
 package com.pedmar.chatkotlin
 
+import android.app.ProgressDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -20,6 +21,7 @@ class RegistroActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var reference: DatabaseReference
+    private lateinit var progressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,9 @@ class RegistroActivity : AppCompatActivity() {
         R_Et_r_password = findViewById(R.id.R_Et_r_password)
         Btn_sign_in = findViewById(R.id.Btn_sign_in)
         auth = FirebaseAuth.getInstance()
+        progressDialog = ProgressDialog(this)
+        progressDialog.setTitle("Registering information")
+        progressDialog.setCanceledOnTouchOutside(false)
     }
 
     private fun ValidarDatos() {
@@ -70,9 +75,12 @@ class RegistroActivity : AppCompatActivity() {
 
 
     private fun RegistrarUsuario(email: String, password: String){
+        progressDialog.setMessage("Please wait")
+        progressDialog.show()
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener{task ->
                 if(task.isSuccessful){
+                    progressDialog.dismiss()
                     var uid : String = ""
                     uid = auth.currentUser!!.uid
                     reference = FirebaseDatabase.getInstance().reference.child("Users").child(uid)
@@ -107,10 +115,12 @@ class RegistroActivity : AppCompatActivity() {
                         }
 
                 }else{
+                    progressDialog.dismiss()
                     Toast.makeText(applicationContext, "An error has occurred", Toast.LENGTH_SHORT).show()
                 }
 
         }.addOnFailureListener{e->
+                progressDialog.dismiss()
                 Toast.makeText(applicationContext, "{$e.message}", Toast.LENGTH_SHORT).show()
             }
     }

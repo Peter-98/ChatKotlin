@@ -27,8 +27,8 @@ class UsersFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        val view : View = inflater.inflate(R.layout.fragment_fragmento_usuarios, container, false)
+        // Infla el layout del fragmento
+        val view : View = inflater.inflate(R.layout.fragment_users, container, false)
 
         rvUsers = view.findViewById(R.id.RV_users)
         rvUsers!!.setHasFixedSize(true)
@@ -113,7 +113,6 @@ class UsersFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
             }
 
         })

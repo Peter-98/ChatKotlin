@@ -43,8 +43,14 @@
     <string name="P_provider"> -- </string>
     <string name="Btn_save">Save</string>
 
+    <string name="Btn_verify">Not verified</string>
+
     <string name="setPhone">Write your number phone</string>
     <string name="Btn_accept_phone">Accept</string>
+
+    <string name="TXT_verified_account">Verified account</string>
+    <string name="Btn_verified_account">Brilliant</string>
+
 
     <!-- Edit image Profile-->
     <string name="Btn_select_image">Select image</string>

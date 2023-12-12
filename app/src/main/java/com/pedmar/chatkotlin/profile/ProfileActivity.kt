@@ -1,6 +1,8 @@
 package com.pedmar.chatkotlin.profile
 
+import android.app.AlertDialog
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -34,6 +36,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var editBanner : ImageView
     private lateinit var provider : TextView
     private lateinit var editPhone : ImageView
+    private lateinit var btnVerify : MaterialButton
 
     var user : FirebaseUser?= null
     var reference : DatabaseReference?=null
@@ -42,11 +45,15 @@ class ProfileActivity : AppCompatActivity() {
     private var phoneNumber = ""
     private var phoneCodeNumber = ""
 
+    private lateinit var progressDialog: ProgressDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         initializeVariables()
         getData()
+        statusVerifyAccount()
+
         btnSave.setOnClickListener{
             updateData()
         }
@@ -75,6 +82,52 @@ class ProfileActivity : AppCompatActivity() {
         editPhone.setOnClickListener{
             setNumberPhone()
         }
+
+        btnVerify.setOnClickListener{
+            if(user!!.isEmailVerified){
+                //Usuario verificado
+                //Toast.makeText(applicationContext, "User verified", Toast.LENGTH_SHORT).show()
+                verifyAccount()
+            }else{
+                //Usuario no verificado
+                confirmVerify()
+            }
+        }
+    }
+
+    private fun confirmVerify() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Verify account")
+            .setMessage("Send verification instructions to ${user!!.email} ?")
+            .setPositiveButton("Send"){d,e->
+                sendConfirmationEmail()
+            }.setNegativeButton("Cancel"){d,e->
+                d.dismiss()
+            }.show()
+    }
+
+    private fun sendConfirmationEmail() {
+        progressDialog.setMessage("Sending verification instructions to email  ${user!!.email}...")
+        progressDialog.show()
+
+        user!!.sendEmailVerification().addOnSuccessListener {
+            //Envio existoso
+            progressDialog.dismiss()
+            Toast.makeText(applicationContext,"Instructions sent. Check the email ${user!!.email}",Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener {e->
+            //Envio no exitoso
+            progressDialog.dismiss()
+            Toast.makeText(applicationContext,"The operation failed due to ${e.message}",Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun statusVerifyAccount(){
+        if(user!!.isEmailVerified){
+            btnVerify.text = "Verified"
+        }else{
+            btnVerify.text = "Not verified"
+        }
+
     }
 
     private fun setNumberPhone() {
@@ -124,6 +177,10 @@ class ProfileActivity : AppCompatActivity() {
         editBanner = findViewById(R.id.P_Edit_banner)
         provider = findViewById(R.id.P_provider)
         editPhone = findViewById(R.id.edit_phone)
+        btnVerify = findViewById(R.id.Btn_verify)
+        progressDialog = ProgressDialog(this)
+        progressDialog.setTitle("Please wait")
+        progressDialog.setCanceledOnTouchOutside(false)
 
         user = FirebaseAuth.getInstance().currentUser
         reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
@@ -169,5 +226,19 @@ class ProfileActivity : AppCompatActivity() {
         }.addOnFailureListener{e->
             Toast.makeText(applicationContext, "An error has occurred ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun verifyAccount(){
+        val btnVerifiedAccount : MaterialButton
+        val dialog = Dialog(this@ProfileActivity)
+
+        dialog.setContentView(R.layout.dialog_verify_account)
+        btnVerifiedAccount = dialog.findViewById(R.id.Btn_verified_account)
+        btnVerifiedAccount.setOnClickListener{
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.setCanceledOnTouchOutside(false)
     }
 }
