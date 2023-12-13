@@ -28,21 +28,20 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (firebaseUser!= null && sent == firebaseUser.uid){
             if (currentUserConnected != user){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                    EnviarNotificacionOreo(message)
+                    sendNotificationOreo(message)
                 }else{
-                    EnviarNotificacion(message)
+                    sendNotification(message)
                 }
             }
         }
     }
 
-    private fun EnviarNotificacion(message: RemoteMessage) {
+    private fun sendNotification(message: RemoteMessage) {
         val user = message.data["user"]
         val icon = message.data["icon"]
         val title = message.data["title"]
         val body = message.data["body"]
 
-        val notificacion = message.notification
         val j = user!!.replace("[\\D]".toRegex(), "").toInt()
         val intent = Intent(this, MainActivity::class.java)
 
@@ -51,7 +50,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         intent.putExtras(bundle)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
-        val pendingIntent = PendingIntent.getActivity(this, j, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(this, j, intent, PendingIntent.FLAG_MUTABLE)
         val sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder : NotificationCompat.Builder = NotificationCompat.Builder(this)
@@ -73,13 +72,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     }
 
-    private fun EnviarNotificacionOreo(message: RemoteMessage) {
+    private fun sendNotificationOreo(message: RemoteMessage) {
         val user = message.data["user"]
         val icon = message.data["icon"]
         val title = message.data["title"]
         val body = message.data["body"]
 
-        val notificacion = message.notification
         val j = user!!.replace("[\\D]".toRegex(), "").toInt()
         val intent = Intent(this, MainActivity::class.java)
 

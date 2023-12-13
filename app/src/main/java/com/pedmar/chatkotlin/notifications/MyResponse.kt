@@ -1,5 +1,5 @@
 package com.pedmar.chatkotlin.notifications
 
 class MyResponse {
-    var succes = 0
+    var success = 0
 }

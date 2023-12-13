@@ -33,11 +33,12 @@
         android:layout_width="100dp"
         android:layout_height="100dp"/>
 
-    <!-- Imagen enviada -->
+    <!-- Mensaje visto -->
     <TextView
         android:id="@+id/seenMessage"
         android:layout_below="@+id/seeMessage"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
 </RelativeLayout>

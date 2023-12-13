@@ -100,7 +100,7 @@ class MessageActivity : AppCompatActivity() {
         val keyMessage = reference.push().key
 
         val infoMessage = HashMap<String, Any?>()
-        infoMessage["idMessage"] = keyMessage
+        infoMessage["keyMessage"] = keyMessage
         infoMessage["issuer"] = uidIssuer
         infoMessage["receiver"] = uidReceiver
         infoMessage["message"] = message
@@ -166,7 +166,7 @@ class MessageActivity : AppCompatActivity() {
                            response: Response<MyResponse>
                        ) {
                            if(response.code() == 200){
-                               if (response.body()!!.succes !==1){
+                               if (response.body()!!.success !==1){
                                    Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
                                }
                            }
@@ -316,7 +316,7 @@ class MessageActivity : AppCompatActivity() {
                 val url = downloadUrl.toString()
 
                 val infoMessageImage = HashMap<String, Any?>()
-                infoMessageImage["idMessage"] = keyMessage
+                infoMessageImage["keyMessage"] = keyMessage
                 infoMessageImage["issuer"] = firebaseUser!!.uid
                 infoMessageImage["receiver"] = uidUserSelected
                 infoMessageImage["message"] = "Submitted image"
