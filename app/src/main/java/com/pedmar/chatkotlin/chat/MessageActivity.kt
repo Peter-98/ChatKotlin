@@ -35,8 +35,12 @@ import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.ChatAdapter
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
+import com.pedmar.chatkotlin.notifications.*
 import com.pedmar.chatkotlin.profile.EditImageProfileActivity
 import com.pedmar.chatkotlin.profile.VisitedProfileActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MessageActivity : AppCompatActivity() {
 
@@ -55,6 +59,8 @@ class MessageActivity : AppCompatActivity() {
     var reference : DatabaseReference ?= null
     var seenListener : ValueEventListener ?= null
 
+    var notify = false
+    var apiService : APIService?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message)
@@ -63,10 +69,12 @@ class MessageActivity : AppCompatActivity() {
         getDataUserSelected()
 
         ibInclude.setOnClickListener {
+            notify = true
             pickImage()
         }
 
         ibSend.setOnClickListener{
+            notify = true
             val message = etMessage.text.toString()
             if (message.isEmpty()){
                 Toast.makeText(applicationContext, "Please enter a message", Toast.LENGTH_SHORT).show()
@@ -122,7 +130,56 @@ class MessageActivity : AppCompatActivity() {
 
         }
 
+        val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        userReference.addValueEventListener(object  : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+               val user = snapshot.getValue(User::class.java)
+                if (notify){
+                    sendNotification(uidReceiver, user!!.getUsername(),message)
+                }
+                notify = false
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+
+    }
+
+    private fun sendNotification(uidReceiver: String, username: String?, message: String) {
+
+        val reference = FirebaseDatabase.getInstance().reference.child("Tokens")
+        val query = reference.orderByKey().equalTo(uidReceiver)
+
+        query.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+               for (datasnapshot in snapshot.children){
+                   val token : Token?= datasnapshot.getValue(Token::class.java)
+
+                   val data = Data(firebaseUser!!.uid, R.mipmap.ic_chat, "$username: $message","New message", uidUserSelected)
+                    val sender = Sender(data!!, token!!.getToken().toString())
+
+                   apiService!!.sendNotification(sender).enqueue(object: Callback<MyResponse>{
+                       override fun onResponse(
+                           call: Call<MyResponse>,
+                           response: Response<MyResponse>
+                       ) {
+                           if(response.code() == 200){
+                               if (response.body()!!.succes !==1){
+                                   Toast.makeText(applicationContext,"An error ocurred", Toast.LENGTH_SHORT).show()
+                               }
+                           }
+                       }
+
+                       override fun onFailure(call: Call<MyResponse>, t: Throwable) {
+                       }
+                   })
+               }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
     }
 
     private fun getDataUserSelected(){
@@ -195,6 +252,8 @@ class MessageActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.title = ""
 
+        apiService = Client.Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
+
         etMessage = findViewById(R.id.etMessage)
         ibSend = findViewById(R.id.iBSend)
         imageProfileChat = findViewById(R.id.imageProfileChat)
@@ -263,6 +322,28 @@ class MessageActivity : AppCompatActivity() {
                 infoMessageImage["message"] = "Submitted image"
                 infoMessageImage["url"] = url
                 infoMessageImage["viewed"] = false
+
+                reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
+                    .addOnCompleteListener { task->
+                        if (task.isSuccessful){
+
+                            val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+                            userReference.addValueEventListener(object  : ValueEventListener{
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val user = snapshot.getValue(User::class.java)
+                                    if (notify){
+                                        sendNotification(uidUserSelected, user!!.getUsername(),"Submitted image")
+                                    }
+                                    notify = false
+                                }
+                                override fun onCancelled(error: DatabaseError) {
+                                }
+                            })
+
+
+
+                        }
+                    }
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
                     .addOnCompleteListener { task ->

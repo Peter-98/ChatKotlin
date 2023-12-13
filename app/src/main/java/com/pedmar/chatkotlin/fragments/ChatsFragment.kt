@@ -1,6 +1,7 @@
 package com.pedmar.chatkotlin.fragments
 
 import android.os.Bundle
+import android.text.TextUtils
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.messaging.FirebaseMessaging
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.model.ChatsList
 import com.pedmar.chatkotlin.model.User
+import com.pedmar.chatkotlin.notifications.Token
 
 class ChatsFragment : Fragment() {
 
@@ -49,11 +52,25 @@ class ChatsFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-
             }
         })
 
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task->
+            if (task.isSuccessful){
+                if (task.result != null && !TextUtils.isEmpty(task.result)){
+                    val token : String = task.result!!
+                    updateToken(token)
+                }
+            }
+        }
+
         return view
+    }
+
+    private fun updateToken(token: String) {
+        val reference = FirebaseDatabase.getInstance().reference.child("Tokens")
+        val token1 = Token(token!!)
+        reference.child(firebaseUser!!.uid).setValue(token1)
     }
 
     private fun getChatList(){
