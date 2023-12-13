@@ -14,22 +14,22 @@ class MyFirebaseInstanceIdService : FirebaseMessagingService() {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         FirebaseMessaging.getInstance().token
-            .addOnCompleteListener { tarea->
-                if (tarea.isSuccessful){
-                    if (tarea.result != null && !TextUtils.isEmpty(tarea.result)){
-                        val mi_token : String = tarea.result!!
+            .addOnCompleteListener { task->
+                if (task.isSuccessful){
+                    if (task.result != null && !TextUtils.isEmpty(task.result)){
+                        val myToken : String = task.result!!
                         if (firebaseUser != null){
-                            updateToken(mi_token)
+                            updateToken(myToken)
                         }
                     }
                 }
             }
     }
 
-    private fun updateToken(miToken: String?) {
+    private fun updateToken(myToken: String?) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         val reference = FirebaseDatabase.getInstance().getReference().child("Tokens")
-        val token = Token(miToken!!)
+        val token = Token(myToken!!)
         reference.child(firebaseUser!!.uid).setValue(token)
 
     }

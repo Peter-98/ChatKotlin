@@ -61,6 +61,7 @@ class MessageActivity : AppCompatActivity() {
 
     var notify = false
     var apiService : APIService?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message)
@@ -153,11 +154,11 @@ class MessageActivity : AppCompatActivity() {
 
         query.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-               for (datasnapshot in snapshot.children){
-                   val token : Token?= datasnapshot.getValue(Token::class.java)
+               for (dataSnapshot in snapshot.children){
+                   val token : Token?= dataSnapshot.getValue(Token::class.java)
 
                    val data = Data(firebaseUser!!.uid, R.mipmap.ic_chat, "$username: $message","New message", uidUserSelected)
-                    val sender = Sender(data!!, token!!.getToken().toString())
+                   val sender = Sender(data!!, token!!.getToken().toString())
 
                    apiService!!.sendNotification(sender).enqueue(object: Callback<MyResponse>{
                        override fun onResponse(
@@ -166,11 +167,10 @@ class MessageActivity : AppCompatActivity() {
                        ) {
                            if(response.code() == 200){
                                if (response.body()!!.succes !==1){
-                                   Toast.makeText(applicationContext,"An error ocurred", Toast.LENGTH_SHORT).show()
+                                   Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
                                }
                            }
                        }
-
                        override fun onFailure(call: Call<MyResponse>, t: Throwable) {
                        }
                    })
@@ -339,9 +339,6 @@ class MessageActivity : AppCompatActivity() {
                                 override fun onCancelled(error: DatabaseError) {
                                 }
                             })
-
-
-
                         }
                     }
 
@@ -366,7 +363,6 @@ class MessageActivity : AppCompatActivity() {
                                 }
 
                                 override fun onCancelled(error: DatabaseError) {
-                                    // Handle error
                                 }
                             })
                         }

@@ -25,9 +25,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val currentUserConnected = sharedPref.getString("currentUser", "none")
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
-        if (firebaseUser != null && sent == firebaseUser.uid) {
-            if (currentUserConnected != user) {
-                EnviarNotificacion(message)
+        if (firebaseUser!= null && sent == firebaseUser.uid){
+            if (currentUserConnected != user){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                    EnviarNotificacionOreo(message)
+                }else{
+                    EnviarNotificacion(message)
+                }
             }
         }
     }
@@ -38,6 +42,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = message.data["title"]
         val body = message.data["body"]
 
+        val notificacion = message.notification
         val j = user!!.replace("[\\D]".toRegex(), "").toInt()
         val intent = Intent(this, MainActivity::class.java)
 
@@ -46,40 +51,58 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         intent.putExtras(bundle)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
-        val pendingIntent = PendingIntent.getActivity(this, j, intent, PendingIntent.FLAG_MUTABLE)
+        val pendingIntent = PendingIntent.getActivity(this, j, intent, PendingIntent.FLAG_ONE_SHOT)
         val sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        val builder : NotificationCompat.Builder = NotificationCompat.Builder(this)
+            .setSmallIcon(icon!!.toInt())
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setSound(sound)
+            .setContentIntent(pendingIntent)
 
-            val oreoNotification = OreoNotification(this)
-            val builder : Notification.Builder = oreoNotification.getOreoNotification(
-                title, body, pendingIntent, sound, icon)
+        val noti = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            var i = 0
-            if (j > 0){
-                i = j
-            }
-
-            //oreoNotification.getManager!!.notify(i, builder.build())
-
-        }else{
-
-            val builder : NotificationCompat.Builder = NotificationCompat.Builder(this)
-                .setSmallIcon(icon!!.toInt())
-                .setContentTitle(title)
-                .setContentText(body)
-                .setAutoCancel(true)
-                .setSound(sound)
-                .setContentIntent(pendingIntent)
-
-            val notification = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            var i = 0
-            if (j > 0){
-                i = j
-            }
-            notification.notify(i, builder.build())
+        var i = 0
+        if (j > 0){
+            i = j
         }
+
+        noti.notify(i, builder.build())
+
     }
 
+    private fun EnviarNotificacionOreo(message: RemoteMessage) {
+        val user = message.data["user"]
+        val icon = message.data["icon"]
+        val title = message.data["title"]
+        val body = message.data["body"]
+
+        val notificacion = message.notification
+        val j = user!!.replace("[\\D]".toRegex(), "").toInt()
+        val intent = Intent(this, MainActivity::class.java)
+
+        val bundle = Bundle()
+        bundle.putString("usuarioid", user)
+        intent.putExtras(bundle)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+        val pendingIntent = PendingIntent.getActivity(this, j, intent, PendingIntent.FLAG_MUTABLE)
+        val sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val oreoNotification = OreoNotification(this)
+
+        val builder : Notification.Builder = oreoNotification.getOreoNotification(
+            title, body, pendingIntent, sound, icon
+        )
+
+        var i = 0
+        if (j > 0){
+            i = j
+        }
+
+        oreoNotification.getManager!!.notify(i, builder.build())
+
+
+    }
 }
