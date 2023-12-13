@@ -44,12 +44,6 @@ jobs:
       - name: Set up Google Services JSON
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
 
-      - name: Set up properties JSON
-        run: |
-          echo "${{ secrets.PROPERTIES_JSON }}" > ./properties.json
-        working-directory: ${{ github.workspace }}
-
-
       # Run Tests Build
       - name: Run gradle tests
         run: ./gradlew test
