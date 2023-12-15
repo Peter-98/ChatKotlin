@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DiscordButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">#7289DA</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="iconStartPadding">8dp</item>
+        <item name="iconEndPadding">8dp</item>
+        <item name="iconSize">24dp</item>
+    </style>
+</resources>
