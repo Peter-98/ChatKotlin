@@ -18,11 +18,16 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var auth : FirebaseAuth
     private lateinit var TXT_ir_sign_up : TextView
     private lateinit var progressDialog : ProgressDialog
+    private lateinit var forgetPassword : TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         //supportActionBar!!.title = "Login"
         InicializarVariables()
+
+        forgetPassword.setOnClickListener{
+            startActivity(Intent(this@LoginActivity, ForgetPasswordActivity::class.java))
+        }
 
         Btn_login.setOnClickListener{
             ValidarDatos()
@@ -43,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Logging in...")
         progressDialog.setCanceledOnTouchOutside(false)
+        forgetPassword = findViewById(R.id.L_forget_password)
     }
 
     private fun ValidarDatos() {

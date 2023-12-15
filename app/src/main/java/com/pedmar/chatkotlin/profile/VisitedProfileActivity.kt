@@ -1,6 +1,7 @@
 package com.pedmar.chatkotlin.profile
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
@@ -48,6 +50,45 @@ class VisitedProfileActivity : AppCompatActivity() {
                 requestCallPhonePermission.launch(Manifest.permission.CALL_PHONE)
             }
         }
+
+        pvUserImage.setOnClickListener{
+            getImage()
+        }
+    }
+
+    private fun getImage() {
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(visitedUidUser)
+
+        reference.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user : User?= snapshot.getValue(User::class.java)
+                val image = user!!.getImage()
+                displayImage(image)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
+    private fun displayImage(image: String?) {
+        val imgView : PhotoView
+        val btnCloseV : Button
+        val dialog = Dialog(this@VisitedProfileActivity)
+
+        dialog.setContentView(R.layout.dialog_view_image)
+
+        imgView = dialog.findViewById(R.id.imgView)
+        btnCloseV = dialog.findViewById(R.id.Btn_close_w)
+
+        Glide.with(applicationContext).load(image).placeholder(R.drawable.ic_send_image).into(imgView)
+
+        btnCloseV.setOnClickListener{
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.setCanceledOnTouchOutside(false)
     }
 
     private fun makeCall() {

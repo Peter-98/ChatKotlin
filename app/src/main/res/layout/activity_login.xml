@@ -62,6 +62,17 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+
+        <TextView
+            android:id="@+id/L_forget_password"
+            android:text="@string/L_forget_password"
+            android:textStyle="bold"
+            android:padding="5dp"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Btn_login"
             android:text="@string/Btn_login"
