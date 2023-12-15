@@ -15,10 +15,16 @@
         android:gravity="center"
         android:padding="10dp">
 
+        <ImageView
+            android:src="@drawable/registro"
+            android:layout_width="80dp"
+            android:layout_height="80dp"/>
+
         <!-- Username -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <EditText
@@ -100,7 +106,8 @@
             android:id="@+id/Btn_sign_in"
             android:text="@string/Btn_sign_in"
             android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
+            app:icon="@drawable/registrar_usuario"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"/>
     </LinearLayout>
 

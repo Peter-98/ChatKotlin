@@ -55,7 +55,7 @@
             android:id="@+id/ibInclude"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/ic_attach"
+            android:background="@drawable/adjuntar_imagen"
             android:layout_alignParentStart="true"/>
 
         <!-- Escribir mensaje-->
@@ -75,7 +75,7 @@
             android:id="@+id/iBSend"
             android:layout_alignParentEnd="true"
             android:layout_width="40dp"
-            android:background="@drawable/ic_send"
+            android:background="@drawable/enviar_mensaje"
             android:layout_height="40dp"/>
 
     </RelativeLayout>

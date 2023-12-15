@@ -195,6 +195,12 @@
                 android:layout_height="wrap_content"/>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <View
+            android:layout_marginTop="10dp"
+            android:background="@color/purple_500"
+            android:layout_width="350dp"
+            android:layout_height="2dp"/>
         
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_marginTop="10dp"
