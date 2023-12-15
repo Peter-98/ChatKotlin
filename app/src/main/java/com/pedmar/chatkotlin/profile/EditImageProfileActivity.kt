@@ -26,6 +26,8 @@ class EditImageProfileActivity : AppCompatActivity() {
     private lateinit var firebaseAuth : FirebaseAuth
     private lateinit var progressDialog : ProgressDialog
 
+    var firebaseUser : FirebaseUser ?= null
+
     companion object {
         const val REQUEST_IMAGE_CAPTURE = 1
         const val REQUEST_IMAGE_PICK = 2
@@ -43,6 +45,7 @@ class EditImageProfileActivity : AppCompatActivity() {
         progressDialog.setCanceledOnTouchOutside(false)
 
         firebaseAuth = FirebaseAuth.getInstance()
+        firebaseUser = FirebaseAuth.getInstance().currentUser
 
         // Recibe el ByteArray de la actividad anterior
         val byteArray = intent.getByteArrayExtra("imageByteArray")
@@ -159,5 +162,19 @@ class EditImageProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateStatus(status : String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        val hashMap = HashMap<String, Any>()
+        hashMap["status"] = status
+        reference!!.updateChildren(hashMap)
+    }
 
+    override fun onResume() {
+        super.onResume()
+        updateStatus("online")
+    }
+    override fun onPause() {
+        super.onPause()
+        updateStatus("offline")
+    }
 }

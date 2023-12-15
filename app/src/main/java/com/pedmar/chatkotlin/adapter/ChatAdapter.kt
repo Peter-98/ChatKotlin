@@ -7,13 +7,11 @@ import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.RelativeLayout
+import android.widget.*
 import android.widget.RelativeLayout.LayoutParams
-import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
@@ -80,12 +78,15 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
                 Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedRightImage!!)
 
                 holder.sendedRightImage!!.setOnClickListener{
-                    val options = arrayOf<CharSequence>("Delete image", "Cancel")
+                    val options = arrayOf<CharSequence>("View image","Delete image", "Cancel")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
                     builder.setItems(options, DialogInterface.OnClickListener {
                             dialogInterface, i ->
                         if (i==0){
+                            viewImage(chat.getUrl())
+                        }
+                        else if (i==1){
                             deleteMessage(position, holder)
                         }
                     })
@@ -97,6 +98,19 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
                 holder.seeMessage!!.visibility = View.GONE
                 holder.sendedLeftImage!!.visibility = View.VISIBLE
                 Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedLeftImage!!)
+
+                holder.sendedLeftImage!!.setOnClickListener{
+                    val options = arrayOf<CharSequence>("View image", "Cancel")
+                    val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    //builder.setTitle("")
+                    builder.setItems(options, DialogInterface.OnClickListener {
+                            dialogInterface, i ->
+                        if (i==0){
+                            viewImage(chat.getUrl())
+                        }
+                    })
+                    builder.show()
+                }
             }
         }else{
             /* Mensaje contiene texto*/
@@ -149,6 +163,26 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
         }else{
             0
         }
+    }
+
+    private fun viewImage(image : String?){
+        val imgView : PhotoView
+        val btnCloseV : Button
+        val dialog = Dialog(context)
+
+        dialog.setContentView(R.layout.dialog_view_image)
+
+        imgView = dialog.findViewById(R.id.imgView)
+        btnCloseV = dialog.findViewById(R.id.Btn_close_w)
+
+        Glide.with(context).load(image).placeholder(R.drawable.ic_send_image).into(imgView)
+
+        btnCloseV.setOnClickListener{
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.setCanceledOnTouchOutside(false)
     }
 
     private fun deleteMessage(position: Int, holder : ChatAdapter.ViewHolder){

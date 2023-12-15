@@ -380,6 +380,7 @@ class MessageActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         reference!!.removeEventListener(seenListener!!)
+        updateStatus("offline")
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -397,5 +398,17 @@ class MessageActivity : AppCompatActivity() {
                 return true
             }else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun updateStatus(status : String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        val hashMap = HashMap<String, Any>()
+        hashMap["status"] = status
+        reference!!.updateChildren(hashMap)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStatus("online")
     }
 }

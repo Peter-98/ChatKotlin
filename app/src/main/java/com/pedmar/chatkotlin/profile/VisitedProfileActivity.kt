@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.User
@@ -30,6 +32,7 @@ class VisitedProfileActivity : AppCompatActivity() {
     private lateinit var pvUserImage : ImageView
     private lateinit var btnCall : Button
     var visitedUidUser = ""
+    var firebaseUser : FirebaseUser ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +88,7 @@ class VisitedProfileActivity : AppCompatActivity() {
         pvProvider = findViewById(R.id.PV_provider)
         pvUserImage = findViewById(R.id.PV_userImage)
         btnCall = findViewById(R.id.Btn_call)
+        firebaseUser = FirebaseAuth.getInstance().currentUser
     }
 
     private fun getUserData(){
@@ -112,5 +116,21 @@ class VisitedProfileActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
         })
+    }
+
+    private fun updateStatus(status : String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        val hashMap = HashMap<String, Any>()
+        hashMap["status"] = status
+        reference!!.updateChildren(hashMap)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStatus("online")
+    }
+    override fun onPause() {
+        super.onPause()
+        updateStatus("offline")
     }
 }

@@ -241,4 +241,20 @@ class ProfileActivity : AppCompatActivity() {
         dialog.show()
         dialog.setCanceledOnTouchOutside(false)
     }
+
+    private fun updateStatus(status : String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
+        val hashMap = HashMap<String, Any>()
+        hashMap["status"] = status
+        reference!!.updateChildren(hashMap)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStatus("online")
+    }
+    override fun onPause() {
+        super.onPause()
+        updateStatus("offline")
+    }
 }

@@ -83,5 +83,7 @@
     <!-- Item chat-->
     <string name="TXT_see_message">Hi, how are u?</string>
 
+    <string name="Btn_close_w"> Close </string>
+
 
 </resources>

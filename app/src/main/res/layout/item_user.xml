@@ -18,12 +18,39 @@
         android:orientation="horizontal"
         android:padding="5dp">
 
-        <ImageView
-            android:id="@+id/Item_image"
-            android:src="@drawable/ic_item_user"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="centerCrop"/> <!-- expandir imagen -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/Item_image"
+                android:src="@drawable/ic_item_user"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="centerCrop"/> <!-- expandir imagen -->
+
+            <ImageView
+                android:id="@+id/statusOnline"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="35dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:backgroundTint="#16A085"
+                android:visibility="gone"
+                android:background="@drawable/circle_status"/>
+
+            <ImageView
+                android:id="@+id/statusOffline"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="35dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:backgroundTint="#E74C3C"
+                android:visibility="gone"
+                android:background="@drawable/circle_status"/>
+
+        </RelativeLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,15 +62,6 @@
                 android:text="@string/Item_username"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:gravity="center"
-                android:layout_gravity="start"
-                android:layout_marginStart="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/Item_user_email"
-                android:text="@string/Item_user_email"
                 android:gravity="center"
                 android:layout_gravity="start"
                 android:layout_marginStart="10dp"

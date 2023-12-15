@@ -28,14 +28,18 @@ class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean
 
     class ViewHolder(itemView : View):RecyclerView.ViewHolder(itemView){
         var username : TextView
-        var userEmail : TextView
+        //var userEmail : TextView
         var userImage : ImageView
+        var statusOnline : ImageView
+        var statusOffline : ImageView
 
         //inicializar
         init {
             username = itemView.findViewById(R.id.Item_username)
-            userEmail = itemView.findViewById(R.id.Item_user_email)
+            //userEmail = itemView.findViewById(R.id.Item_user_email)
             userImage = itemView.findViewById(R.id.Item_image)
+            statusOnline = itemView.findViewById(R.id.statusOnline)
+            statusOffline = itemView.findViewById(R.id.statusOffline)
         }
     }
 
@@ -52,7 +56,7 @@ class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
        val user : User = usersList[position]
         holder.username.text = user.getUsername()
-        holder.userEmail.text = user.getEmail()
+        //holder.userEmail.text = user.getEmail()
 
         //Mientras se carga la imagen se mostrara ic_item_user
         Glide.with(context).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(holder.userImage)
@@ -64,6 +68,19 @@ class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean
             intent.putExtra("userUid", user.getUid())
             Toast.makeText(context, "The selected user is: "+user.getUsername(), Toast.LENGTH_SHORT).show()
             context.startActivity(intent)
+        }
+
+        if(viewedChat){
+            if(user.getStatus() == "online"){
+                holder.statusOnline.visibility = View.VISIBLE
+                holder.statusOffline.visibility = View.GONE
+            }else{
+                holder.statusOnline.visibility = View.GONE
+                holder.statusOffline.visibility = View.VISIBLE
+            }
+        }else{
+            holder.statusOnline.visibility = View.GONE
+            holder.statusOffline.visibility = View.GONE
         }
     }
 }
