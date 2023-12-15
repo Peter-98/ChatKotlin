@@ -30,6 +30,7 @@
 
     <string name="Item_username">Username</string>
     <string name="Item_user_email">User email</string>
+    <string name="Item_last_message"></string>
 
     <string name="Et_search_user">Search user</string>
 

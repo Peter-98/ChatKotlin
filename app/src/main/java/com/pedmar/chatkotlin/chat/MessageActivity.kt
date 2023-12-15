@@ -1,7 +1,9 @@
 package com.pedmar.chatkotlin.chat
 
+import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,17 +11,14 @@ import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Adapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -36,7 +35,6 @@ import com.pedmar.chatkotlin.adapter.ChatAdapter
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.notifications.*
-import com.pedmar.chatkotlin.profile.EditImageProfileActivity
 import com.pedmar.chatkotlin.profile.VisitedProfileActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -71,7 +69,13 @@ class MessageActivity : AppCompatActivity() {
 
         ibInclude.setOnClickListener {
             notify = true
-            pickImage()
+
+            if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED){
+                pickImage()
+            }else{
+                requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
         }
 
         ibSend.setOnClickListener{
@@ -375,6 +379,15 @@ class MessageActivity : AppCompatActivity() {
             }
         }
     }
+
+    private val requestGalleryPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                pickImage()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     //Detiene la tarea de actualizar viewed de false a true
     override fun onPause() {

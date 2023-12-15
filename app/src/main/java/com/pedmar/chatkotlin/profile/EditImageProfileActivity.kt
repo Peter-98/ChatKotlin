@@ -1,8 +1,10 @@
 package com.pedmar.chatkotlin.profile
 
+import android.Manifest
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -10,7 +12,9 @@ import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
@@ -79,19 +83,30 @@ class EditImageProfileActivity : AppCompatActivity() {
     }
 
     private fun dispatchTakePictureIntent() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-        } catch (e: Exception) {
-            Toast.makeText(applicationContext, "Camera Not Available", Toast.LENGTH_SHORT).show()
+        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED) {
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            try {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+            } catch (e: Exception) {
+                Toast.makeText(applicationContext, "Camera Not Available", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }else{
+           requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
     }
 
 
     private fun dispatchPickImageIntent() {
-        val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        pickImageIntent.type = "image/*"
-        startActivityForResult(pickImageIntent, REQUEST_IMAGE_PICK)
+        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED){
+            val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            pickImageIntent.type = "image/*"
+            startActivityForResult(pickImageIntent, REQUEST_IMAGE_PICK)
+        }else{
+            requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -161,6 +176,25 @@ class EditImageProfileActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "Error uploading image to storage: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private val requestGalleryPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                dispatchPickImageIntent()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val requestCameraPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){permission_granted->
+            if (permission_granted){
+                dispatchTakePictureIntent()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+
+        }
 
     private fun updateStatus(status : String){
         val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
