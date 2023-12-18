@@ -14,6 +14,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
+        android:background="?attr/colorPrimary"
         android:padding="10dp">
 
         <ImageView
@@ -23,6 +24,7 @@
 
         <!-- Email -->
         <com.google.android.material.textfield.TextInputLayout
+            app:hintTextColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -38,11 +40,13 @@
                 android:padding="20dp"
                 android:drawablePadding="10dp"/>
 
+
         </com.google.android.material.textfield.TextInputLayout>
 
 
         <!-- Password -->
         <com.google.android.material.textfield.TextInputLayout
+            app:hintTextColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:passwordToggleEnabled="true"
@@ -74,6 +78,9 @@
             android:layout_height="wrap_content"/>
 
         <com.google.android.material.button.MaterialButton
+            android:textColor="@color/colorGrey2"
+            app:iconTint="@color/colorGrey2"
+            android:backgroundTint="@color/colorBlue"
             android:id="@+id/Btn_login"
             android:text="@string/Btn_login"
             app:icon="@drawable/ingresar_app"

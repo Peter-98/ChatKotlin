@@ -18,7 +18,7 @@
         android:layout_toEndOf="@+id/imageProfileChat"
         android:textSize="18sp"
         android:padding="8dp"
-        android:textColor="#848484"
+        android:textColor="#2b2d31"
         android:layout_marginStart="5dp"
         android:background="@drawable/left_background"
         android:layout_width="wrap_content"

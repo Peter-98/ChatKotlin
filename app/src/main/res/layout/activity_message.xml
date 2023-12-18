@@ -10,7 +10,7 @@
 
     <!-- Imagen y nombre de usuario -->
     <androidx.appcompat.widget.Toolbar
-        android:backgroundTint="@color/teal_700"
+        android:backgroundTint="?attr/colorPrimary"
         android:id="@+id/toolbarChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
