@@ -51,7 +51,7 @@
 
     <string name="Btn_verify">Not verified</string>
 
-    <string name="setPhone">Write your number phone</string>
+    <string name="setPhone">Write your phone number</string>
     <string name="Btn_accept_phone">Accept</string>
 
     <string name="TXT_verified_account">Verified account</string>

@@ -31,6 +31,8 @@
         android:layout_marginTop="10dp"
         android:layout_gravity="center"
         android:layout_width="180dp"
+        android:backgroundTint="@color/colorGrey2"
+        android:textColor="@color/white"
         android:layout_height="wrap_content"/>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

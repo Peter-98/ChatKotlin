@@ -5,7 +5,7 @@
     android:layout_width="350dp"
     android:layout_height="120dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#F0F3F4"
+    android:background="?attr/backgroundChat"
     android:orientation="vertical"
     android:layout_gravity="center">
 
@@ -20,13 +20,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            app:ccpDialog_textColor="@color/white"
+            app:ccp_contentColor="@color/white"
             app:ccp_autoDetectCountry="true"
             app:ccp_rememberLastSelection="true"/>
 
         <EditText
             android:id="@+id/setPhone"
             android:hint="@string/setPhone"
-            android:textColor="#5D6D7E"
+            android:textColor="@color/white"
             android:layout_marginStart="5dp"
             android:gravity="center"
             android:inputType="phone"
@@ -41,6 +43,7 @@
         android:text="@string/Btn_accept_phone"
         android:layout_marginTop="10dp"
         android:layout_gravity="center"
+        android:textColor="@color/white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
