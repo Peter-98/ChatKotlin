@@ -200,6 +200,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center"
                 app:icon="@drawable/ic_save"
+                app:iconTint="@color/white"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content">
 

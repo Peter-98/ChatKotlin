@@ -211,6 +211,7 @@
 
         <Button
             app:icon="@drawable/ic_call"
+            app:iconTint="@color/white"
             android:textColor="@color/white"
             android:id="@+id/Btn_call"
             android:text="@string/Btn_call"
