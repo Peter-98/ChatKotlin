@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:background="?attr/itemUser"
         android:padding="5dp">
 
         <RelativeLayout
@@ -63,6 +64,7 @@
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:gravity="center"
+                android:textColor="@color/white"
                 android:layout_gravity="start"
                 android:layout_marginStart="10dp"
                 android:layout_width="wrap_content"
@@ -72,6 +74,7 @@
                 android:id="@+id/Item_last_message"
                 android:textSize="20sp"
                 android:maxLines="1"
+                android:textColor="?attr/itemUserMsg"
                 android:layout_marginStart="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

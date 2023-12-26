@@ -2,4 +2,7 @@
 <resources>
 
     <attr name="customTextColor" format="reference|color" />
+    <attr name="backgroundChat" format="reference|color" />
+    <attr name="itemUser" format="reference|color" />
+    <attr name="itemUserMsg" format="reference|color" />
 </resources>

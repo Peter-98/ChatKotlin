@@ -41,15 +41,16 @@
         android:layout_below="@+id/toolbarChat"
         android:layout_above="@+id/rlSendMessage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="?attr/backgroundChat"/>
 
     <RelativeLayout
         android:id="@+id/rlSendMessage"
         android:padding="5dp"
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
+        android:layout_height="wrap_content"
+        android:background="?attr/customTextColor">
 
         <!-- Adjuntar imagen-->
         <ImageButton
@@ -63,6 +64,8 @@
         <EditText
             android:id="@+id/etMessage"
             android:hint="@string/C_message"
+            android:textColorHint="@color/white"
+            android:textColor="@color/white"
             android:layout_toEndOf="@+id/ibInclude"
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"

@@ -11,7 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="?attr/backgroundChat">
 
 
         <RelativeLayout
@@ -119,6 +120,8 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
                 android:layout_width="150dp"
+                android:backgroundTint="#404249"
+                android:textColor="@color/white"
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -189,14 +192,20 @@
 
 
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Btn_save"
                 android:text="@string/Btn_save"
+                android:backgroundTint="#404249"
+                android:textColor="@color/white"
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center"
                 app:icon="@drawable/ic_save"
                 android:layout_width="150dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+
+
+
+            </com.google.android.material.button.MaterialButton>
         </LinearLayout>
 
     </LinearLayout>
