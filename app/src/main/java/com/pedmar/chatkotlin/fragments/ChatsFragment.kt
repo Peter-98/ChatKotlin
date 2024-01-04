@@ -1,5 +1,6 @@
 package com.pedmar.chatkotlin.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import androidx.fragment.app.Fragment
@@ -26,6 +27,8 @@ class ChatsFragment : Fragment() {
 
     lateinit var rvChatsList : RecyclerView
     private var firebaseUser : FirebaseUser?=null
+    private var valueEventListener: ValueEventListener? = null
+    private var reference : DatabaseReference?=null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,7 +43,7 @@ class ChatsFragment : Fragment() {
 
         firebaseUser = FirebaseAuth.getInstance().currentUser
         userListChats = ArrayList()
-        val reference = FirebaseDatabase.getInstance().reference.child("MessageList").child(firebaseUser!!.uid)
+        reference = FirebaseDatabase.getInstance().reference.child("MessageList").child(firebaseUser!!.uid)
         reference!!.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userListChats as ArrayList).clear()
@@ -48,7 +51,8 @@ class ChatsFragment : Fragment() {
                     val chatList = dataSnapshot.getValue(ChatsList::class.java)
                     (userListChats as ArrayList).add(chatList!!)
                 }
-                getChatList()
+                val context = requireContext()
+                getChatList(context)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -73,10 +77,10 @@ class ChatsFragment : Fragment() {
         reference.child(firebaseUser!!.uid).setValue(token1)
     }
 
-    private fun getChatList(){
+    private fun getChatList(context: Context?){
         userList = ArrayList()
         val reference = FirebaseDatabase.getInstance().reference.child("Users")
-        reference!!.addValueEventListener(object : ValueEventListener{
+        valueEventListener = object : ValueEventListener {
             //Leemos en tiempo real
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userList as ArrayList).clear()
@@ -96,7 +100,13 @@ class ChatsFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
 
             }
-        })
+        }
+        reference?.addValueEventListener(valueEventListener as ValueEventListener)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        valueEventListener?.let { reference?.removeEventListener(it) }
     }
 
 }

@@ -75,7 +75,7 @@ class UserAdapter (context: Context, usersList: List<User>, viewedChat : Boolean
 
             //Se envia el uid del usuario
             intent.putExtra("userUid", user.getUid())
-            Toast.makeText(context, "The selected user is: "+user.getUsername(), Toast.LENGTH_SHORT).show()
+            //se llama al chat
             context.startActivity(intent)
         }
 

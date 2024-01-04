@@ -17,12 +17,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.pedmar.chatkotlin.R.*
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
-import java.nio.file.Paths
 import java.util.*
 
 class Inicio : AppCompatActivity() {
@@ -65,7 +59,6 @@ class Inicio : AppCompatActivity() {
 
         Btn_ir_login_google.setOnClickListener {
             startLogInGoogle()
-
         }
     }
 
@@ -77,7 +70,7 @@ class Inicio : AppCompatActivity() {
 
 
 
-    /* Comprobar si ha sido seleccionado o cancelado la llamada a google*/
+    /* Comprobar si ha sido seleccionada o cancelada la llamada a google*/
     private val googleSignInARL = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()){result->
         if(result.resultCode == RESULT_OK){
@@ -110,6 +103,8 @@ class Inicio : AppCompatActivity() {
                     startActivity(Intent(this, MainActivity::class.java))
                     finishAffinity()
                 }
+                // Finalizar la actividad actual para que no aparezca en la pila de actividades
+                finish()
             }.addOnFailureListener{e->
                 Toast.makeText(applicationContext, "${e.message}", Toast.LENGTH_SHORT).show()
             }
@@ -154,7 +149,7 @@ class Inicio : AppCompatActivity() {
     }
 
 
-    private fun ComprobarSesion(){
+    private fun checkSession(){
         firebaseUser = FirebaseAuth.getInstance().currentUser
         if(firebaseUser!= null){
             val intent = Intent(this@Inicio, MainActivity::class.java)
@@ -165,7 +160,7 @@ class Inicio : AppCompatActivity() {
     }
 
     override fun onStart(){
-        ComprobarSesion()
+        checkSession()
         super.onStart()
     }
 }

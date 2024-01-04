@@ -36,6 +36,9 @@ class LoginActivity : AppCompatActivity() {
         TXT_ir_sign_up.setOnClickListener{
             val intent = Intent(this@LoginActivity, RegistroActivity::class.java)
             startActivity(intent)
+
+            // Finalizar la actividad actual para que no aparezca en la pila de actividades
+            finish()
         }
     }
 
@@ -60,12 +63,12 @@ class LoginActivity : AppCompatActivity() {
         }else if (password.isEmpty()) {
             Toast.makeText(applicationContext, "Password is empty", Toast.LENGTH_SHORT).show()
         }else{
-            LoginUsuario(email, password)
+            loginUser(email, password)
         }
 
     }
 
-    private fun LoginUsuario(email: String, password: String) {
+    private fun loginUser(email: String, password: String) {
         progressDialog.setMessage("Please wait")
         progressDialog.show()
         auth.signInWithEmailAndPassword(email, password)

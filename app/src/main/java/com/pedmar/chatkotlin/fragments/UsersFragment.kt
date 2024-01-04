@@ -1,5 +1,6 @@
 package com.pedmar.chatkotlin.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,7 +23,9 @@ class UsersFragment : Fragment() {
     private var userList : List<User>?=null
     private var rvUsers : RecyclerView?=null
     private lateinit var etSearchUser : EditText
-
+    private val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
+    private val reference = FirebaseDatabase.getInstance().reference.child("Users").orderByChild("username")
+    private var valueEventListener: ValueEventListener? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,7 +40,8 @@ class UsersFragment : Fragment() {
 
 
         userList = ArrayList()
-        getUsersBd()
+        val context = requireContext()
+        getUsersBd(context)
 
         etSearchUser.addTextChangedListener(object : TextWatcher{
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -55,10 +59,9 @@ class UsersFragment : Fragment() {
         return view
     }
 
-    private fun getUsersBd() {
-        val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
-        val reference = FirebaseDatabase.getInstance().reference.child("Users").orderByChild("username")
-        reference.addValueEventListener(object : ValueEventListener {
+    private fun getUsersBd(context: Context?) {
+
+        valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userList as ArrayList<User>).clear()
 
@@ -83,7 +86,8 @@ class UsersFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
             }
 
-        })
+        }
+        reference?.addValueEventListener(valueEventListener as ValueEventListener)
     }
 
     //Se actualiza la busqueda dependiendo del termino de entrada
@@ -116,6 +120,12 @@ class UsersFragment : Fragment() {
             }
 
         })
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        valueEventListener?.let { reference?.removeEventListener(it) }
     }
 
 }

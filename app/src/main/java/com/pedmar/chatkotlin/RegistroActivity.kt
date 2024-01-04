@@ -30,7 +30,7 @@ class RegistroActivity : AppCompatActivity() {
         initializeVariables()
 
         Btn_sign_in.setOnClickListener{
-            ValidarDatos()
+            checkData()
         }
     }
 
@@ -46,7 +46,7 @@ class RegistroActivity : AppCompatActivity() {
         progressDialog.setCanceledOnTouchOutside(false)
     }
 
-    private fun ValidarDatos() {
+    private fun checkData() {
         val username: String = R_Et_username.text.toString()
         val email: String = R_Et_email.text.toString()
         val password: String = R_Et_password.text.toString()
@@ -69,12 +69,12 @@ class RegistroActivity : AppCompatActivity() {
         } else if (!password.equals(rPassword)) {
             Toast.makeText(applicationContext, "Passwords do not match", Toast.LENGTH_SHORT).show()
         } else {
-            RegistrarUsuario(email, password)
+            saveUser(email, password)
         }
     }
 
 
-    private fun RegistrarUsuario(email: String, password: String){
+    private fun saveUser(email: String, password: String){
         progressDialog.setMessage("Please wait")
         progressDialog.show()
         auth.createUserWithEmailAndPassword(email, password)
@@ -108,6 +108,8 @@ class RegistroActivity : AppCompatActivity() {
                                 val intent = Intent(this@RegistroActivity, MainActivity::class.java)
                                 Toast.makeText(applicationContext, "Has been successfully registered", Toast.LENGTH_SHORT).show()
                                 startActivity(intent)
+                                // Finalizar la actividad actual para que no aparezca en la pila de actividades
+                                finish()
                             }
 
                     }.addOnFailureListener{e->

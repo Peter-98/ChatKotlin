@@ -32,11 +32,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        InicializarComponentes()
-        ObtenerDato()
+        initializeComponents()
+        getData()
     }
 
-    fun InicializarComponentes(){
+    private fun initializeComponents(){
 
         var toolbar : Toolbar = findViewById(R.id.toolbarMain)
         setSupportActionBar(toolbar)
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun ObtenerDato(){
+    private fun getData(){
         reference!!.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
             }
 
         })
@@ -147,6 +146,8 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this@MainActivity, Inicio::class.java)
                 Toast.makeText(applicationContext, "You have logged out", Toast.LENGTH_SHORT).show()
                 startActivity(intent)
+                // Finalizar la actividad actual para que no aparezca en la pila de actividades
+                finish()
                 return true
             }else-> super.onOptionsItemSelected(item)
         }
