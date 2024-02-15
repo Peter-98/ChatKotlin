@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,6 +46,7 @@ class ChatAdapter(
         var sendedLeftImage : ImageView?= null
         var sendedRightImage : ImageView?= null
         var seenMessage : TextView?= null
+        var userName : TextView?= null
 
         init{
             imageProfileChat = itemView.findViewById(R.id.imageProfileChat)
@@ -52,6 +54,7 @@ class ChatAdapter(
             sendedLeftImage = itemView.findViewById(R.id.sendedLeftImage)
             sendedRightImage = itemView.findViewById(R.id.sendedRightImage)
             seenMessage = itemView.findViewById(R.id.seenMessage)
+            userName = itemView.findViewById(R.id.userName)
         }
 
     }
@@ -76,10 +79,22 @@ class ChatAdapter(
 
         // Obtener el color del usuario desde el mapa de colores
         val userColor = userColorsMap?.get(chat.getIssuer())
-
         // Si el mensaje es de un grupo y se encuentra en el mapa de colores, asignar el color al fondo del mensaje
         if (userColor != null && chat.isGroupChat() && !chat.getIssuer().equals(firebaseUser.uid)) {
-            holder.seeMessage?.setBackgroundColor(userColor.toInt())
+
+
+            val messageLayout = holder.itemView.findViewById<LinearLayout>(R.id.messageLayout)
+
+            val drawable = messageLayout?.background?.mutate()
+            drawable?.setColorFilter(userColor.toInt(), PorterDuff.Mode.SRC)
+            messageLayout?.setBackground(drawable)
+
+            //messageLayout.setBackgroundColor(userColor.toInt())
+
+            holder.userName!!.text = chat.getIssuer()
+            holder.userName!!.visibility = View.VISIBLE
+        }else{
+            holder.userName!!.visibility = View.GONE
         }
 
         /* Si el mensaje contiene image*/

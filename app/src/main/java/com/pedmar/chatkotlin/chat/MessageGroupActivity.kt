@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -132,26 +133,30 @@ class MessageGroupActivity : AppCompatActivity() {
 
         }
 
-        val groupReference = FirebaseDatabase.getInstance().reference.child("Group").child(uidGroup)
+        val groupReference = FirebaseDatabase.getInstance().reference.child("Groups").child(uidGroup)
         groupReference.addValueEventListener(object  : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val groupChat = snapshot.getValue(GroupChat::class.java)
                 if (groupChat != null) {
-                    for(userId in groupChat.getUidUsersList()!!){
-                        val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(userId)
-                        userReference.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(userSnapshot: DataSnapshot) {
-                                val user = userSnapshot.getValue(User::class.java)
+                    val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+                    userReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(userSnapshot: DataSnapshot) {
+                            val user = userSnapshot.getValue(User::class.java)
+                            for (userId in groupChat.getUidUsersList()!!) {
+
                                 if (notify && user != null) {
                                     sendNotification(userId, user.getUsername(), message)
                                 }
-                                notify = false
+                                if (userId == groupChat.getUidUsersList()!!.last()) {
+                                    notify = false
+                                }
                             }
+                        }
 
                             override fun onCancelled(error: DatabaseError) {
                             }
                         })
-                    }
+
                 }
             }
             override fun onCancelled(error: DatabaseError) {
@@ -180,7 +185,9 @@ class MessageGroupActivity : AppCompatActivity() {
                         ) {
                             if(response.code() == 200){
                                 if (response.body()!!.success !==1){
-                                    Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
+
+                                    Log.d("NOTIFICATION", "Error sending notification to user")
+                                    //Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }

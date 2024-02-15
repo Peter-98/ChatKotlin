@@ -7,22 +7,42 @@
     <!-- Imagen de perfil -->
     <ImageView
         android:id="@+id/imageProfileChat"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:src="@drawable/ic_profile_message"/>
 
-    <!-- visualizar el mensaje -->
-    <TextView
-        android:id="@+id/seeMessage"
-        android:text="@string/TXT_see_message"
-        android:layout_toEndOf="@+id/imageProfileChat"
-        android:textSize="18sp"
-        android:padding="8dp"
-        android:textColor="#2b2d31"
-        android:layout_marginStart="5dp"
-        android:background="@drawable/left_background"
+    <!-- Nombre de usuario y visualizar el mensaje -->
+    <LinearLayout
+        android:id="@+id/messageLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/imageProfileChat"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical"
+        android:background="@drawable/left_background">
+
+        <!-- Nombre de usuario -->
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="Nombre de usuario"/>
+
+        <!-- visualizar el mensaje -->
+        <TextView
+            android:id="@+id/seeMessage"
+            android:text="@string/TXT_see_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:textColor="#2b2d31"/>
+
+    </LinearLayout>
 
     <!-- Imagen enviada -->
     <ImageView
@@ -36,7 +56,7 @@
     <!-- Mensaje visto -->
     <TextView
         android:id="@+id/seenMessage"
-        android:layout_below="@+id/seeMessage"
+        android:layout_below="@+id/messageLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"/>

@@ -19,17 +19,39 @@
             android:src="@drawable/ic_profile_message"
             android:visibility="gone"/>
 
-        <!-- visualizar el mensaje -->
-        <TextView
-            android:id="@+id/seeMessage"
-            android:text="@string/TXT_see_message"
-            android:textSize="18sp"
-            android:padding="8dp"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/right_background"
-            android:textColor="#fff"
+        <!-- Nombre de usuario y visualizar el mensaje -->
+        <LinearLayout
+            android:id="@+id/messageLayout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/imageProfileChat"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/right_background"> <!-- Definir el color de fondo aquí -->
+
+            <!-- Nombre de usuario -->
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:text="Nombre de usuario"/>
+
+            <!-- visualizar el mensaje -->
+            <TextView
+                android:id="@+id/seeMessage"
+                android:text="@string/TXT_see_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:padding="8dp"
+                android:textColor="#fff"/>
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/sendedRightImage"
@@ -41,7 +63,7 @@
         <TextView
             android:id="@+id/seenMessage"
             android:layout_alignParentEnd="true"
-            android:layout_below="@+id/seeMessage"
+            android:layout_below="@+id/messageLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"/>
