@@ -28,6 +28,7 @@
     <string name="L_forget_password">Forgotten password?</string>
     <string name="L_instructions">Enter your email to reset your password</string>ç
     <string name="Btn_send_email">Send</string>
+    <string name="L_Et_group_name">Enter group name</string>
 
 
     <string name="username">Username</string>
@@ -37,6 +38,7 @@
     <string name="Item_last_message"></string>
 
     <string name="Et_search_user">Search user</string>
+    <string name="Et_group_name"> Enter the group name </string>
 
     <!-- User Profile-->
     <string name="P_username">Username</string>

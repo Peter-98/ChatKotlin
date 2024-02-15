@@ -16,6 +16,7 @@ import com.google.firebase.database.*
 import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.R
+import com.pedmar.chatkotlin.model.GroupChat
 
 class UsersFragment : Fragment() {
 
@@ -76,7 +77,13 @@ class UsersFragment : Fragment() {
                         }
                     }
                     //Pasar la lista al adaptador
-                    userAdapter = UserAdapter(context!!, userList!!, false)
+                    userAdapter = UserAdapter(
+                        context!!,
+                        userList!!,
+                        false,
+                        false,
+                        null
+                    )
 
                     //Seteamos el adaptador al recycleView
                     rvUsers!!.adapter = userAdapter
@@ -110,7 +117,13 @@ class UsersFragment : Fragment() {
                 }
 
                 //Pasar la lista al adaptador
-                userAdapter = UserAdapter(context!!, userList!!, false)
+                userAdapter = UserAdapter(
+                    context!!,
+                    userList!!,
+                    false,
+                    false,
+                    null
+                )
 
                 //Seteamos el adaptador al recycleView
                 rvUsers!!.adapter = userAdapter

@@ -1,21 +1,25 @@
 package com.pedmar.chatkotlin.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
+import com.pedmar.chatkotlin.CreateGroupActivity
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.model.ChatsList
+import com.pedmar.chatkotlin.model.GroupChat
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.notifications.Token
 
@@ -23,7 +27,9 @@ class ChatsFragment : Fragment() {
 
     private var userAdapter : UserAdapter?= null
     private var userList : List<User>?=null
+    private var usersGroupList : List<GroupChat>?=null
     private var userListChats : List<ChatsList>?=null
+    private lateinit var addGroup : ImageButton
 
     lateinit var rvChatsList : RecyclerView
     private var firebaseUser : FirebaseUser?=null
@@ -40,6 +46,7 @@ class ChatsFragment : Fragment() {
         rvChatsList = view.findViewById(R.id.RV_chatsList)
         rvChatsList.setHasFixedSize(true)
         rvChatsList.layoutManager = LinearLayoutManager(context)
+        addGroup = view.findViewById(R.id.addGroup)
 
         firebaseUser = FirebaseAuth.getInstance().currentUser
         userListChats = ArrayList()
@@ -48,8 +55,12 @@ class ChatsFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userListChats as ArrayList).clear()
                 for (dataSnapshot in snapshot.children){
-                    val chatList = dataSnapshot.getValue(ChatsList::class.java)
-                    (userListChats as ArrayList).add(chatList!!)
+
+                    val uidData = dataSnapshot.key
+                    if (uidData != null) {
+                            val chatList = ChatsList(uidData)
+                            (userListChats as ArrayList).add(chatList)
+                    }
                 }
                 val context = requireContext()
                 getChatList(context)
@@ -58,6 +69,11 @@ class ChatsFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
             }
         })
+
+        addGroup.setOnClickListener {
+            val intent = Intent(requireActivity(), CreateGroupActivity::class.java)
+            startActivity(intent)
+        }
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task->
             if (task.isSuccessful){
@@ -77,32 +93,74 @@ class ChatsFragment : Fragment() {
         reference.child(firebaseUser!!.uid).setValue(token1)
     }
 
-    private fun getChatList(context: Context?){
+    private fun getChatList(context: Context?) {
         userList = ArrayList()
-        val reference = FirebaseDatabase.getInstance().reference.child("Users")
-        valueEventListener = object : ValueEventListener {
-            //Leemos en tiempo real
+        usersGroupList = ArrayList()
+
+        val referenceUsers = FirebaseDatabase.getInstance().reference.child("Users")
+        val referenceGroups = FirebaseDatabase.getInstance().reference.child("Groups")
+
+        // ValueEventListener para obtener usuarios en tiempo real
+        val valueEventListenerUsers = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userList as ArrayList).clear()
-                for (dataSnapshot in snapshot.children){
+                for (dataSnapshot in snapshot.children) {
                     val user = dataSnapshot.getValue(User::class.java)
+
                     for(chat in userListChats!!){
                         //Comprobamos si el usuario actual es igual que la lista de chat del otro usuario
                         if(user!!.getUid().equals(chat.getUid())){
                             (userList as ArrayList).add(user!!)
                         }
                     }
-                    userAdapter = UserAdapter(context!!, (userList as ArrayList<User>), true)
-                    rvChatsList.adapter = userAdapter
                 }
+                updateAdapter(context)
             }
 
             override fun onCancelled(error: DatabaseError) {
-
+                // Manejar errores de cancelación
             }
         }
-        reference?.addValueEventListener(valueEventListener as ValueEventListener)
+
+        // ValueEventListener para obtener grupos en tiempo real
+        val valueEventListenerGroups = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (dataSnapshot in snapshot.children) {
+
+                    val group = dataSnapshot.getValue(GroupChat::class.java)
+                    for(chat in userListChats!!){
+
+                        //Comprobamos si el usuario actual es igual que la lista de chat del otro usuario
+                        if(group!!.getUidUsersList()!!.contains(firebaseUser!!.uid)
+                            && !group!!.getUidUsersList()!!.contains(chat.getUid())
+                            && !((usersGroupList as ArrayList).contains(group!!))){
+                            (usersGroupList as ArrayList).add(group!!)
+                        }
+                    }
+                }
+                updateAdapter(context)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Manejar errores de cancelación
+            }
+        }
+
+        // Agregar los ValueEventListener a las referencias correspondientes
+        referenceUsers.addValueEventListener(valueEventListenerUsers)
+        referenceGroups.addValueEventListener(valueEventListenerGroups)
     }
+
+    // Método para actualizar el adaptador después de obtener los datos de usuarios y grupos
+    private fun updateAdapter(context: Context?) {
+        // Verificar que al menos una de las dos listas no sea nula y no esté vacía
+        if ((userList != null && userList!!.isNotEmpty()) || (usersGroupList != null && usersGroupList!!.isNotEmpty())) {
+            userAdapter = UserAdapter(requireContext(), userList ?: emptyList(), true, false, usersGroupList ?: emptyList())
+            rvChatsList.adapter = userAdapter
+        }
+    }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
