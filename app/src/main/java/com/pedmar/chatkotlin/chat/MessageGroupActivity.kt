@@ -103,7 +103,7 @@ class MessageGroupActivity : AppCompatActivity() {
         infoMessage["keyMessage"] = keyMessage
         infoMessage["issuer"] = uidIssuer
         infoMessage["receiver"] = uidGroup
-        infoMessage["message"] = message.trim()
+        infoMessage["message"] = message.replace("\n", " ").trim()
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
         infoMessage["groupChat"] = true
@@ -132,16 +132,28 @@ class MessageGroupActivity : AppCompatActivity() {
 
         }
 
-        val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
-        userReference.addValueEventListener(object  : ValueEventListener {
+        val groupReference = FirebaseDatabase.getInstance().reference.child("Group").child(uidGroup)
+        groupReference.addValueEventListener(object  : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.getValue(User::class.java)
-                if (notify){
-                    sendNotification(uidGroup, user!!.getUsername(),message)
-                }
-                notify = false
-            }
+                val groupChat = snapshot.getValue(GroupChat::class.java)
+                if (groupChat != null) {
+                    for(userId in groupChat.getUidUsersList()!!){
+                        val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(userId)
+                        userReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(userSnapshot: DataSnapshot) {
+                                val user = userSnapshot.getValue(User::class.java)
+                                if (notify && user != null) {
+                                    sendNotification(userId, user.getUsername(), message)
+                                }
+                                notify = false
+                            }
 
+                            override fun onCancelled(error: DatabaseError) {
+                            }
+                        })
+                    }
+                }
+            }
             override fun onCancelled(error: DatabaseError) {
             }
         })

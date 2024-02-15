@@ -107,7 +107,7 @@ class MessageActivity : AppCompatActivity() {
         infoMessage["keyMessage"] = keyMessage
         infoMessage["issuer"] = uidIssuer
         infoMessage["receiver"] = uidReceiver
-        infoMessage["message"] = message.trim()
+        infoMessage["message"] = message.replace("\n", " ").trim()
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
         infoMessage["groupChat"] = false

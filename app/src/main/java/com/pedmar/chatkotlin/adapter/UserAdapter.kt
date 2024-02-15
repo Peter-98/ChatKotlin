@@ -192,10 +192,12 @@ class UserAdapter(
                 for (dataSnapshot in snapshot.children){
                     val chat : Chat?= dataSnapshot.getValue(Chat::class.java)
                     if(firebaseUser!= null && chat!= null){
-                        if (chat.getReceiver() == firebaseUser.uid &&
+                        if ((chat.getReceiver() == firebaseUser.uid &&
                             chat.getIssuer() == userUid ||
                             chat.getReceiver() == userUid &&
-                            chat.getIssuer() == firebaseUser!!.uid){
+                            chat.getIssuer() == firebaseUser!!.uid)
+
+                            || (chat.isGroupChat() && chat.getReceiver() == userUid)){
                             lastMessage = chat.getMessage()!!
                         }
                     }
