@@ -2,6 +2,7 @@ package com.pedmar.chatkotlin
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,9 @@ import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.chat.MessageGroupActivity
 import com.pedmar.chatkotlin.model.GroupChat
 import com.pedmar.chatkotlin.model.User
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class CreateGroupActivity : AppCompatActivity() {
 
@@ -93,6 +97,7 @@ class CreateGroupActivity : AppCompatActivity() {
         groupInfo["image"] = groupChat.getImage()
         groupInfo["name"] = groupChat.getName()
         groupInfo["uidUsersList"] = groupChat.getUidUsersList()
+        groupInfo["colorUsersList"] =  assignRandomColorsToUsers(groupChat.getUidUsersList()!!)
 
         // Guardar información del grupo en la base de datos
         reference.child("Groups").child(groupChat.getUidGroup()!!).setValue(groupInfo)
@@ -119,6 +124,31 @@ class CreateGroupActivity : AppCompatActivity() {
                     // Manejar errores al crear el grupo en la base de datos "Groups"
                 }
             }
+    }
+
+    fun assignRandomColorsToUsers(userIds: List<String>): Map<String, Long> {
+        val userColorsMap = mutableMapOf<String, Long>()
+        val usedColors = mutableSetOf<Long>()
+
+        for (userId in userIds) {
+            var randomColor = generateRandomColor().toLong()
+
+            // Verificar si el color generado ya está en uso
+            while (usedColors.contains(randomColor)) {
+                randomColor = generateRandomColor().toLong()
+            }
+
+            // Asignar el color al usuario y agregarlo al conjunto de colores usados
+            userColorsMap[userId] = randomColor
+            usedColors.add(randomColor)
+        }
+
+        return userColorsMap
+    }
+
+    fun generateRandomColor(): Int {
+        val random = Random()
+        return Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256))
     }
 
 }

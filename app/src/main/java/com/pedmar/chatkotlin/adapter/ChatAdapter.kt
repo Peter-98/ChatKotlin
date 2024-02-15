@@ -18,9 +18,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.Chat
 
-class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
+class ChatAdapter(
+    context: Context,
+    chatList: List<Chat>,
+    imageUrl: String,
+    userColorsMap: Map<String, Long>?
+)
     : RecyclerView.Adapter<ChatAdapter.ViewHolder?>(){
 
+    private var userColorsMap: Map<String, Long>?
     private val context : Context
     private val chatList : List<Chat>
     private val imageUrl : String
@@ -30,8 +36,8 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
         this.context = context
         this.chatList = chatList
         this.imageUrl = imageUrl
+        this.userColorsMap = userColorsMap
     }
-
 
     inner class ViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView){
         var imageProfileChat : ImageView?= null
@@ -67,6 +73,14 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
        val chat : Chat = chatList[position]
         Glide.with(context).load(imageUrl).placeholder(R.drawable.ic_image_chat).into(holder.imageProfileChat!!)
+
+        // Obtener el color del usuario desde el mapa de colores
+        val userColor = userColorsMap?.get(chat.getIssuer())
+
+        // Si el mensaje es de un grupo y se encuentra en el mapa de colores, asignar el color al fondo del mensaje
+        if (userColor != null && chat.isGroupChat) {
+            holder.seeMessage?.setBackgroundColor(userColor.toInt())
+        }
 
         /* Si el mensaje contiene image*/
         if(chat.getMessage().equals("Submitted image") && !chat.getUrl().equals("")){
@@ -115,7 +129,6 @@ class ChatAdapter (context : Context, chatList : List<Chat>, imageUrl : String)
         }else{
             /* Mensaje contiene texto*/
             holder.seeMessage!!.text = chat.getMessage()
-
             //Se puede eliminar mensaje
             if(firebaseUser!!.uid == chat.getIssuer()){
                 holder.seeMessage!!.setOnClickListener {

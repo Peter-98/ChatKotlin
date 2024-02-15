@@ -7,7 +7,7 @@ class Chat {
     private var message : String = ""
     private var url : String = ""
     private var viewed = false
-
+    val isGroupChat :Boolean = false
     constructor()
 
     constructor(

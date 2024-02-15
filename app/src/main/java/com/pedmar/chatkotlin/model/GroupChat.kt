@@ -6,6 +6,7 @@ class GroupChat {
     private var image : String = ""
     private var name : String = ""
     private var uidUsersList : List<String> = emptyList()
+    private var colorUsersList : Map<String, Long> = emptyMap()
 
     constructor()
 
@@ -13,12 +14,14 @@ class GroupChat {
         uidGroup: String,
         image: String,
         name: String,
-        uidUsersList: List<String>
+        uidUsersList: List<String>,
+        colorUsersList: Map<String, Long>
     ) {
         this.uidGroup = uidGroup
         this.name = name
         this.image = image
         this.uidUsersList = uidUsersList
+        this.colorUsersList = colorUsersList
     }
 
     //getters y setters
@@ -52,5 +55,13 @@ class GroupChat {
 
     fun setUidUsersList(uidUsersList : List<String>){
         this.uidUsersList = uidUsersList
+    }
+
+    fun getColorUsersList() : Map<String, Long>?{
+        return colorUsersList
+    }
+
+    fun setColorUsersList(colorUsersList : Map<String, Long>){
+        this.colorUsersList = colorUsersList
     }
 }

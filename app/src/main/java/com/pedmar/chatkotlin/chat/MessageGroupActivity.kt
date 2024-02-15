@@ -106,6 +106,7 @@ class MessageGroupActivity : AppCompatActivity() {
         infoMessage["message"] = message
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
+        infoMessage["isGroupChat"] = true
         reference.child("Chats").child(keyMessage!!).setValue(infoMessage).addOnCompleteListener{task->
             if (task.isSuccessful){
                 val listMessageIssuer = FirebaseDatabase.getInstance().reference.child("MessageList")
@@ -228,28 +229,48 @@ class MessageGroupActivity : AppCompatActivity() {
 
     private fun getMessages(issuerUid: String, receiverUid: String, receiverImage: String?) {
         chatList = ArrayList()
-        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
-        reference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                (chatList as ArrayList<Chat>).clear()
-                for (sn in snapshot.children){
-                    val chat = sn.getValue(Chat::class.java)
+        var userColorsMap: Map<String, Long>? = null // Mapa de colores de usuarios
 
-                    if(chat!!.getReceiver().equals(issuerUid) && chat.getIssuer().equals(receiverUid)
-                        || chat.getReceiver().equals(receiverUid) && chat.getIssuer().equals(issuerUid)){
-                        (chatList as ArrayList<Chat>).add(chat)
-                    }
+        // Obtener la referencia a la base de datos de Groups
+        val groupsReference = FirebaseDatabase.getInstance().reference.child("Groups")
 
-                    chatAdapter = ChatAdapter(this@MessageGroupActivity, (chatList as ArrayList<Chat>), receiverImage!!)
-                    rvChats.adapter = chatAdapter
+        // Obtener la lista de colores de usuarios del grupo
+        groupsReference.child(receiverUid).child("colorUsersList")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(colorSnapshot: DataSnapshot) {
+                    userColorsMap = colorSnapshot.value as Map<String, Long>?
+
+                    // Obtener los mensajes del chat
+                    val chatsReference = FirebaseDatabase.getInstance().reference.child("Chats")
+                    chatsReference.addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            (chatList as ArrayList<Chat>).clear()
+                            for (sn in snapshot.children){
+                                val chat = sn.getValue(Chat::class.java)
+
+                                if(chat!!.getReceiver().equals(receiverUid)
+                                    || chat.getReceiver().equals(receiverUid) && chat.getIssuer().equals(issuerUid)){
+                                    (chatList as ArrayList<Chat>).add(chat)
+                                }
+                            }
+
+                            // Crear y configurar el adaptador con la lista de mensajes y el mapa de colores de usuarios
+                            chatAdapter = ChatAdapter(this@MessageGroupActivity, chatList as ArrayList<Chat>, receiverImage!!, userColorsMap)
+                            rvChats.adapter = chatAdapter
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Manejar la cancelación de la lectura de datos
+                        }
+                    })
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-            }
-
-        })
+                override fun onCancelled(colorError: DatabaseError) {
+                    // Manejar la cancelación de la lectura de datos
+                }
+            })
     }
+
 
     private fun initializeVariables(){
 
@@ -328,6 +349,7 @@ class MessageGroupActivity : AppCompatActivity() {
                 infoMessageImage["message"] = "Submitted image"
                 infoMessageImage["url"] = url
                 infoMessageImage["viewed"] = false
+                infoMessageImage["isGroupChat"] = true
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
                     .addOnCompleteListener { task->

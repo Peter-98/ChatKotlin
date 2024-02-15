@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="290dp"
+    android:layout_height="wrap_content">
+
+    <!-- Imagen de perfil -->
+    <ImageView
+        android:id="@+id/imageProfileChat"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_profile_message"/>
+
+    <!-- visualizar el mensaje -->
+    <TextView
+        android:id="@+id/seeMessage"
+        android:text="@string/TXT_see_message"
+        android:layout_toEndOf="@+id/imageProfileChat"
+        android:textSize="18sp"
+        android:padding="8dp"
+        android:textColor="#2b2d31"
+        android:layout_marginStart="5dp"
+        android:background="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- Imagen enviada -->
+    <ImageView
+        android:id="@+id/sendedLeftImage"
+        android:layout_toEndOf="@+id/imageProfileChat"
+        android:layout_marginStart="5dp"
+        android:visibility="gone"
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+
+    <!-- Mensaje visto -->
+    <TextView
+        android:id="@+id/seenMessage"
+        android:layout_below="@+id/seeMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+</RelativeLayout>
