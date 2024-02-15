@@ -103,10 +103,10 @@ class MessageGroupActivity : AppCompatActivity() {
         infoMessage["keyMessage"] = keyMessage
         infoMessage["issuer"] = uidIssuer
         infoMessage["receiver"] = uidGroup
-        infoMessage["message"] = message
+        infoMessage["message"] = message.trim()
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
-        infoMessage["isGroupChat"] = true
+        infoMessage["groupChat"] = true
         reference.child("Chats").child(keyMessage!!).setValue(infoMessage).addOnCompleteListener{task->
             if (task.isSuccessful){
                 val listMessageIssuer = FirebaseDatabase.getInstance().reference.child("MessageList")
@@ -349,7 +349,7 @@ class MessageGroupActivity : AppCompatActivity() {
                 infoMessageImage["message"] = "Submitted image"
                 infoMessageImage["url"] = url
                 infoMessageImage["viewed"] = false
-                infoMessageImage["isGroupChat"] = true
+                infoMessageImage["groupChat"] = true
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
                     .addOnCompleteListener { task->

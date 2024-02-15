@@ -78,7 +78,7 @@ class ChatAdapter(
         val userColor = userColorsMap?.get(chat.getIssuer())
 
         // Si el mensaje es de un grupo y se encuentra en el mapa de colores, asignar el color al fondo del mensaje
-        if (userColor != null && chat.isGroupChat) {
+        if (userColor != null && chat.isGroupChat() && !chat.getIssuer().equals(firebaseUser.uid)) {
             holder.seeMessage?.setBackgroundColor(userColor.toInt())
         }
 

@@ -7,7 +7,8 @@ class Chat {
     private var message : String = ""
     private var url : String = ""
     private var viewed = false
-    val isGroupChat :Boolean = false
+    private var groupChat = false
+
     constructor()
 
     constructor(
@@ -16,7 +17,8 @@ class Chat {
         receiver: String,
         message: String,
         url: String,
-        viewed: Boolean
+        viewed: Boolean,
+        groupChat: Boolean
     ) {
         this.keyMessage = keyMessage
         this.issuer = issuer
@@ -24,6 +26,7 @@ class Chat {
         this.message = message
         this.url = url
         this.viewed = viewed
+        this.groupChat = groupChat
     }
 
     //getters y setters
@@ -73,5 +76,13 @@ class Chat {
 
     fun setIsViewed(viewed : Boolean?){
         this.viewed = viewed!!
+    }
+
+    fun isGroupChat() : Boolean{
+        return groupChat
+    }
+
+    fun setIsGroupChat(groupChat : Boolean?){
+        this.groupChat = groupChat!!
     }
 }
