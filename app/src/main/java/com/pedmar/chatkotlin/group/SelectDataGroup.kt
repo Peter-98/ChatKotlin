@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin
+package com.pedmar.chatkotlin.group
 
 import android.Manifest
 import android.app.Activity
@@ -6,24 +6,21 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Patterns
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.GroupChat
 import com.pedmar.chatkotlin.model.User
 import java.io.ByteArrayOutputStream
@@ -132,7 +129,7 @@ class SelectDataGroup  : AppCompatActivity(){
 
 
     private fun showImageSelectionDialog() {
-        val items = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        val items = arrayOf("Take Photo", "Choose from Gallery")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle("Select Image")
@@ -140,7 +137,6 @@ class SelectDataGroup  : AppCompatActivity(){
             when (which) {
                 0 -> dispatchTakePictureIntent()
                 1 -> dispatchPickImageIntent()
-                2 -> dialog.dismiss()
             }
         }
         builder.show()

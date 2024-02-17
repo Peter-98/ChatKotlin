@@ -68,7 +68,7 @@ class EditImageProfileActivity : AppCompatActivity() {
     }
 
     private fun showImageSelectionDialog() {
-        val items = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        val items = arrayOf("Take Photo", "Choose from Gallery")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle("Select Image")
@@ -76,7 +76,6 @@ class EditImageProfileActivity : AppCompatActivity() {
             when (which) {
                 0 -> dispatchTakePictureIntent()
                 1 -> dispatchPickImageIntent()
-                2 -> dialog.dismiss()
             }
         }
         builder.show()

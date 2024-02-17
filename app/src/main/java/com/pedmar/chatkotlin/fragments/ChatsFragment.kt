@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
-import com.pedmar.chatkotlin.CreateGroupActivity
+import com.pedmar.chatkotlin.group.CreateGroupActivity
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.model.ChatsList
@@ -155,7 +155,7 @@ class ChatsFragment : Fragment() {
     private fun updateAdapter(context: Context?) {
         // Verificar que al menos una de las dos listas no sea nula y no esté vacía
         if ((userList != null && userList!!.isNotEmpty()) || (usersGroupList != null && usersGroupList!!.isNotEmpty())) {
-            userAdapter = UserAdapter(requireContext(), userList ?: emptyList(), true, false, usersGroupList ?: emptyList())
+            userAdapter = UserAdapter(requireContext(), userList ?: emptyList(), true, false, false,usersGroupList ?: emptyList())
             rvChatsList.adapter = userAdapter
         }
     }

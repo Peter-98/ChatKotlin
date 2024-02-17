@@ -1,6 +1,8 @@
 package com.pedmar.chatkotlin.adapter
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -18,18 +20,19 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.R
-import com.pedmar.chatkotlin.SelectDataGroup
+import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.chat.MessageActivity
 import com.pedmar.chatkotlin.chat.MessageGroupActivity
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.GroupChat
-import java.security.acl.Group
+import com.pedmar.chatkotlin.profile.VisitedProfileActivity
 
 class UserAdapter(
     context: Context,
     usersList: List<User>,
     viewedChat: Boolean,
     createGroup: Boolean,
+    groupMembers: Boolean,
     groupList: List<GroupChat>?
 ) : RecyclerView.Adapter<UserAdapter.ViewHolder?>(){
 
@@ -37,6 +40,7 @@ class UserAdapter(
     private val usersList : List<User>
     private val viewedChat : Boolean
     private val createGroup : Boolean
+    private val groupMembers : Boolean
     private val groupList : List<GroupChat>
     var lastMessage : String = ""
 
@@ -48,6 +52,7 @@ class UserAdapter(
         this.usersList = usersList
         this.viewedChat = viewedChat
         this.createGroup = createGroup
+        this.groupMembers = groupMembers
         this.groupList = (groupList ?: emptyList()) as List<GroupChat>
     }
 
@@ -98,7 +103,7 @@ class UserAdapter(
             }
 
             holder.itemView.setOnClickListener{
-                if(createGroup){
+                if(createGroup) {
 
                     // Manejar la selección/deselección al hacer clic en el usuario
                     if (selectedUsers.contains(user.getUid())) {
@@ -107,7 +112,7 @@ class UserAdapter(
                         user.getUid()?.let { it1 -> selectedUsers.add(it1) }
                     }
 
-                    // Mostrar el botón de acción flotante si hay dos o más elementos seleccionados y addGroupButton no es nulo
+                    // Mostrar el botón  si hay dos o más elementos
                     if (selectedUsers.size >= 2 && addGroupButton != null) {
                         addGroupButton!!.visibility = View.VISIBLE
                     } else {
@@ -116,6 +121,26 @@ class UserAdapter(
 
                     // Notificar al adaptador que los datos han cambiado
                     notifyDataSetChanged()
+
+                }else if(groupMembers){
+                    val options = arrayOf<CharSequence>("Send a message","View Profile", "Cancel")
+                    val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    //builder.setTitle("")
+                    builder.setItems(options, DialogInterface.OnClickListener {
+                            dialogInterface, i ->
+                        if (i==0){
+                            val intent = Intent(context, MessageActivity::class.java)
+                            intent.putExtra("userUid", user.getUid())
+                            context.startActivity(intent)
+                        }
+                        else if (i==1){
+                            val intent = Intent(context, VisitedProfileActivity::class.java)
+                            intent.putExtra("uid", user.getUid())
+                            context.startActivity(intent)
+                        }
+                    })
+                    builder.show()
+
                 }else{
                     val intent = Intent(context, MessageActivity::class.java)
                     //Se envia el uid del usuario

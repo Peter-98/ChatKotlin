@@ -89,8 +89,6 @@ class ChatAdapter(
             drawable?.setColorFilter(userColor.toInt(), PorterDuff.Mode.SRC)
             messageLayout?.setBackground(drawable)
 
-            //messageLayout.setBackgroundColor(userColor.toInt())
-
             holder.userName!!.text = chat.getIssuer()
             holder.userName!!.visibility = View.VISIBLE
         }else{
@@ -107,7 +105,7 @@ class ChatAdapter(
                 Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedRightImage!!)
 
                 holder.sendedRightImage!!.setOnClickListener{
-                    val options = arrayOf<CharSequence>("View image","Delete image", "Cancel")
+                    val options = arrayOf<CharSequence>("View image","Delete image")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
                     builder.setItems(options, DialogInterface.OnClickListener {
@@ -129,7 +127,7 @@ class ChatAdapter(
                 Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedLeftImage!!)
 
                 holder.sendedLeftImage!!.setOnClickListener{
-                    val options = arrayOf<CharSequence>("View image", "Cancel")
+                    val options = arrayOf<CharSequence>("View image")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
                     builder.setItems(options, DialogInterface.OnClickListener {
@@ -147,7 +145,7 @@ class ChatAdapter(
             //Se puede eliminar mensaje
             if(firebaseUser!!.uid == chat.getIssuer()){
                 holder.seeMessage!!.setOnClickListener {
-                    val options = arrayOf<CharSequence>("Delete message", "Cancel")
+                    val options = arrayOf<CharSequence>("Delete message")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
                     builder.setItems(options, DialogInterface.OnClickListener {
@@ -208,7 +206,6 @@ class ChatAdapter(
         btnCloseV.setOnClickListener{
             dialog.dismiss()
         }
-
         dialog.show()
         dialog.setCanceledOnTouchOutside(false)
     }
@@ -223,7 +220,5 @@ class ChatAdapter(
                     Toast.makeText(holder.itemView.context, "The message has not been deleted", Toast.LENGTH_SHORT).show()
                 }
             }
-
-
     }
 }

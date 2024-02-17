@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin
+package com.pedmar.chatkotlin.group
 
 import com.pedmar.chatkotlin.model.GroupChat
 

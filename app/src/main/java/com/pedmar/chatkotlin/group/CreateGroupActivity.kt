@@ -1,4 +1,4 @@
-package com.pedmar.chatkotlin
+package com.pedmar.chatkotlin.group
 
 import android.content.Context
 import android.content.Intent
@@ -12,6 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.UserAdapter
 import com.pedmar.chatkotlin.chat.MessageGroupActivity
 import com.pedmar.chatkotlin.model.GroupChat
@@ -28,8 +29,6 @@ class CreateGroupActivity : AppCompatActivity() {
     private val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
     private val reference = FirebaseDatabase.getInstance().reference.child("Users").orderByChild("username")
     private var valueEventListener: ValueEventListener? = null
-
-    private var groupChat = GroupChat()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +68,7 @@ class CreateGroupActivity : AppCompatActivity() {
                     userList!!,
                     false,
                     true,
+                    false,
                     null
                 )
                 userAdapter!!.setAddGroupButton(findViewById(R.id.addGroup))

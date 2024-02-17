@@ -82,6 +82,7 @@ class UsersFragment : Fragment() {
                         userList!!,
                         false,
                         false,
+                        false,
                         null
                     )
 
@@ -120,6 +121,7 @@ class UsersFragment : Fragment() {
                 userAdapter = UserAdapter(
                     context!!,
                     userList!!,
+                    false,
                     false,
                     false,
                     null

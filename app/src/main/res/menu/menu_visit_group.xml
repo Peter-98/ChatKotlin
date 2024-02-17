@@ -2,7 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menu_visit_profile"
-        android:title="@string/menu_visit">
+        android:id="@+id/menu_visit_group"
+        android:title="@string/menu_group">
     </item>
+
 </menu>
