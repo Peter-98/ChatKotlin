@@ -1,23 +1,36 @@
 package com.pedmar.chatkotlin.adapter
 
+import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.RelativeLayout.LayoutParams
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import com.pedmar.chatkotlin.R
+import com.pedmar.chatkotlin.chat.DownloadFilesActivity
+import com.pedmar.chatkotlin.group.ActivityManager
+import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.model.Chat
+import com.pedmar.chatkotlin.profile.VisitedProfileActivity
+import java.io.File
 
 class ChatAdapter(
     context: Context,
@@ -31,7 +44,7 @@ class ChatAdapter(
     private val context : Context
     private val chatList : List<Chat>
     private val imageUrl : String
-    var firebaseUser : FirebaseUser = FirebaseAuth.getInstance().currentUser!!
+    private var firebaseUser : FirebaseUser = FirebaseAuth.getInstance().currentUser!!
 
     init {
         this.context = context
@@ -89,7 +102,7 @@ class ChatAdapter(
             drawable?.setColorFilter(userColor.toInt(), PorterDuff.Mode.SRC)
             messageLayout?.setBackground(drawable)
 
-            holder.userName!!.text = chat.getIssuer()
+            holder.userName!!.text = chat.getUsernameIssuer()
             holder.userName!!.visibility = View.VISIBLE
         }else{
             holder.userName!!.visibility = View.GONE
@@ -139,6 +152,54 @@ class ChatAdapter(
                     builder.show()
                 }
             }
+        }else if(chat.getMessage()!!.contains("File: ") && !chat.getUrl().equals("")) {
+
+            /* Usuario envia un archivo como mensaje*/
+            if(chat.getIssuer().equals(firebaseUser!!.uid)) {
+                holder.seeMessage!!.text = chat.getMessage()
+                holder.sendedRightImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(R.drawable.ic_file).into(holder.sendedRightImage!!)
+
+                holder.sendedRightImage!!.setOnClickListener{
+                    val options = arrayOf<CharSequence>("Download file","Delete file")
+                    val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    //builder.setTitle("")
+                    builder.setItems(options, DialogInterface.OnClickListener {
+                            dialogInterface, i ->
+                        if (i==0) {
+                            val intent = Intent(context, DownloadFilesActivity::class.java)
+                            intent.putExtra("uri", chat.getUrl()!!)
+                            intent.putExtra("name", chat.getMessage()!!.substringAfter("File: "))
+                            context.startActivity(intent)
+                        }else if (i==1){
+                            deleteMessage(position, holder)
+                        }
+                    })
+                    builder.show()
+                }
+            /* Usuario nos envia un arhicvo como mensaje*/
+            }else if(!chat.getIssuer().equals(firebaseUser!!.uid)){
+                holder.seeMessage!!.text = chat.getMessage()
+                holder.sendedLeftImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(R.drawable.ic_file).into(holder.sendedLeftImage!!)
+
+                holder.sendedLeftImage!!.setOnClickListener{
+                    val options = arrayOf<CharSequence>("Download file")
+                    val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    //builder.setTitle("")
+                    builder.setItems(options, DialogInterface.OnClickListener {
+                            dialogInterface, i ->
+                        if (i==0){
+                            val intent = Intent(context, DownloadFilesActivity::class.java)
+                            intent.putExtra("uri", chat.getUrl()!!)
+                            intent.putExtra("name", chat.getMessage()!!.substringAfter("File: "))
+                            context.startActivity(intent)
+                        }
+                    })
+                    builder.show()
+                }
+            }
+
         }else{
             /* Mensaje contiene texto*/
             holder.seeMessage!!.text = chat.getMessage()
@@ -210,6 +271,23 @@ class ChatAdapter(
         dialog.setCanceledOnTouchOutside(false)
     }
 
+    private fun downloadFile(fileUrl : String, name: String){
+        val storage = FirebaseStorage.getInstance()
+        val storageRef = storage.getReferenceFromUrl(fileUrl)
+
+        // Create a local file reference
+        val localFile = File("/sdcard/download/${name}")
+
+        storageRef.getFile(localFile)
+            .addOnSuccessListener {
+
+                println("File downloaded successfully")
+            }
+            .addOnFailureListener {
+                println("Error downloading file: $it")
+            }
+    }
+
     private fun deleteMessage(position: Int, holder : ChatAdapter.ViewHolder){
         val reference = FirebaseDatabase.getInstance().reference.child("Chats")
             .child(chatList.get(position).getKeyMessage()!!)
@@ -221,4 +299,5 @@ class ChatAdapter(
                 }
             }
     }
+
 }
