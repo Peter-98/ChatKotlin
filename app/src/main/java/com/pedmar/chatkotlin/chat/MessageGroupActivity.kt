@@ -18,7 +18,6 @@ import android.view.MenuItem
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,8 +44,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -87,7 +84,7 @@ class MessageGroupActivity : AppCompatActivity(){
 
             if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED){
-                pickImage()
+                selectAction()
             }else{
                 requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
@@ -368,7 +365,7 @@ class MessageGroupActivity : AppCompatActivity(){
         linearLayoutManager.stackFromEnd = true
         rvChats.layoutManager = linearLayoutManager
     }
-    private fun pickImage() {
+    private fun selectAction() {
         val items = arrayOf("Take Photo", "Choose from Gallery", "Select document")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
@@ -608,7 +605,7 @@ class MessageGroupActivity : AppCompatActivity(){
     private val requestGalleryPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
             if (permission_granted){
-                pickImage()
+                selectAction()
             }else{
                 Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
             }

@@ -9,8 +9,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -23,7 +23,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -33,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
 import com.pedmar.chatkotlin.R
@@ -82,7 +82,7 @@ class MessageActivity : AppCompatActivity() {
 
             if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED){
-                pickImage()
+                selectAction()
             }else{
                 requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
@@ -289,8 +289,8 @@ class MessageActivity : AppCompatActivity() {
         rvChats.layoutManager = linearLayoutManager
     }
 
-    private fun pickImage() {
-        val items = arrayOf("Take Photo", "Choose from Gallery")
+    private fun selectAction() {
+        val items = arrayOf("Take Photo", "Choose from Gallery", "Select document")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle("Select Image")
@@ -298,9 +298,20 @@ class MessageActivity : AppCompatActivity() {
             when (which) {
                 0 -> dispatchTakePictureIntent()
                 1 -> dispatchPickImageIntent()
+                2 -> dispatchPickDocumentIntent()
             }
         }
         builder.show()
+    }
+
+    private fun dispatchPickDocumentIntent() {
+        if (ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            val pickDocumentIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            pickDocumentIntent.type = "*/*"
+            startActivityForResult(pickDocumentIntent, SelectDataGroup.REQUEST_DOCUMENT_PICK)
+        } else {
+            requestDocumentPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
     }
     private fun dispatchTakePictureIntent() {
         if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.CAMERA) ==
@@ -341,43 +352,60 @@ class MessageActivity : AppCompatActivity() {
             when (requestCode) {
                 SelectDataGroup.REQUEST_IMAGE_CAPTURE -> {
                     val imageBitmap = data?.extras?.get("data") as Bitmap
-                    handleImageSelection(imageBitmap)
+                    handleImageSelection(imageBitmap, null)
                 }
                 SelectDataGroup.REQUEST_IMAGE_PICK -> {
                     val selectedImage = data?.data
                     val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
-                    handleImageSelection(imageBitmap)
+                    handleImageSelection(imageBitmap, null)
+                }
+                SelectDataGroup.REQUEST_DOCUMENT_PICK -> {
+                    val selectedDocumentUri = data?.data
+                    selectedDocumentUri?.let { uri ->
+                        handleImageSelection(null, uri)
+                    }
                 }
             }
         }
     }
 
-    private fun handleImageSelection(imageBitmap: Bitmap) {
+    private fun handleImageSelection(imageBitmap: Bitmap?, documentUri: Uri?) {
         val loadingImage = ProgressDialog(this@MessageActivity)
         loadingImage.setMessage("Loading Image...")
         loadingImage.setCanceledOnTouchOutside(false)
         loadingImage.show()
 
-        val imageFolder = FirebaseStorage.getInstance().reference.child("Messages images")
         val reference = FirebaseDatabase.getInstance().reference
         val keyMessage = reference.push().key
-        val imageName = imageFolder.child("$keyMessage.png")
 
-        // Convierte el Bitmap a ByteArray
-        val stream = ByteArrayOutputStream()
-        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val imageData = stream.toByteArray()
+        var uploadTask: StorageTask<*>? = null
+        var imageFolder: StorageReference? = null
+        var ref : StorageReference? = null
 
+        if(documentUri != null){
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages documents")
+            // Obtener el nombre del archivo original
+            ref = imageFolder.child("$keyMessage")
+            uploadTask = ref.putFile(documentUri)
 
-        val uploadTask: StorageTask<*>
-        uploadTask = imageName.putBytes(imageData)
+        }else{
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages images")
+            ref = imageFolder.child("$keyMessage.png")
+
+            // Convierte el Bitmap a ByteArray
+            val stream = ByteArrayOutputStream()
+            imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val imageData = stream.toByteArray()
+
+            uploadTask = ref.putBytes(imageData)
+        }
         uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
             if (!task.isSuccessful) {
                 task.exception?.let {
                     throw it
                 }
             }
-            return@Continuation imageName.downloadUrl
+            return@Continuation ref.downloadUrl
         }).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 loadingImage.dismiss()
@@ -392,6 +420,12 @@ class MessageActivity : AppCompatActivity() {
                 infoMessageImage["url"] = url
                 infoMessageImage["viewed"] = false
                 infoMessageImage["groupChat"] = false
+
+                if(documentUri != null){
+                    infoMessageImage["message"] = "File: ${getFileNameFromUri(documentUri)}"
+                }else{
+                    infoMessageImage["message"] = "Submitted image"
+                }
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
                     .addOnCompleteListener { task->
@@ -446,10 +480,31 @@ class MessageActivity : AppCompatActivity() {
         }
     }
 
+    private fun getFileNameFromUri(uri: Uri): String {
+        var fileName = ""
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex != -1 && it.moveToFirst()) {
+                fileName = it.getString(nameIndex)
+            }
+        }
+        return fileName
+    }
+
+    private val requestDocumentPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                dispatchPickDocumentIntent()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     private val requestGalleryPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
             if (permission_granted){
-                pickImage()
+                selectAction()
             }else{
                 Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
             }
