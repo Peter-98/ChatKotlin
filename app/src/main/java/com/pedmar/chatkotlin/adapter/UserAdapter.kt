@@ -75,7 +75,7 @@ class UserAdapter(
 
     //Conectar adaptador con el item usuario
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view : View = LayoutInflater.from(context).inflate(R.layout.item_user, parent, false)
+        var view : View = LayoutInflater.from(context).inflate(R.layout.item_user, parent, false)
         return ViewHolder(view)
     }
 
@@ -157,7 +157,6 @@ class UserAdapter(
                     selectedUsers.sorted()
                     val intent = Intent(context, SelectDataGroup::class.java)
                     intent.putExtra("selectedUsers", selectedUsers.joinToString("-"))
-                    println("lista de usuarios seleccionados$selectedUsers")
                     context.startActivity(intent)
                 }
             }
@@ -201,11 +200,6 @@ class UserAdapter(
             Glide.with(context).load(groupChat.getImage()).placeholder(R.drawable.ic_item_user).into(holder.userImage)
         }
 
-    }
-
-    // Método para obtener los usuarios seleccionados
-    fun getSelectedUsers(): Set<String> {
-        return selectedUsers
     }
 
     private fun getLastMessage(userUid: String?, itemLastMessage: TextView) {

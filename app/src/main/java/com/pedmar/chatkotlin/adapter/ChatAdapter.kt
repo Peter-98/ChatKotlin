@@ -271,23 +271,6 @@ class ChatAdapter(
         dialog.setCanceledOnTouchOutside(false)
     }
 
-    private fun downloadFile(fileUrl : String, name: String){
-        val storage = FirebaseStorage.getInstance()
-        val storageRef = storage.getReferenceFromUrl(fileUrl)
-
-        // Create a local file reference
-        val localFile = File("/sdcard/download/${name}")
-
-        storageRef.getFile(localFile)
-            .addOnSuccessListener {
-
-                println("File downloaded successfully")
-            }
-            .addOnFailureListener {
-                println("Error downloading file: $it")
-            }
-    }
-
     private fun deleteMessage(position: Int, holder : ChatAdapter.ViewHolder){
         val reference = FirebaseDatabase.getInstance().reference.child("Chats")
             .child(chatList.get(position).getKeyMessage()!!)

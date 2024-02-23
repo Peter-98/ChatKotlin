@@ -61,81 +61,115 @@ class UsersFragment : Fragment() {
     }
 
     private fun getUsersBd(context: Context?) {
-
         valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userList as ArrayList<User>).clear()
 
-                if(etSearchUser.text.toString().isEmpty()){
-                    //Se recorre la base de datos para guardar en la lista
-                    for (sh in snapshot.children){
-                        val user : User?= sh.getValue(User::class.java)
+                if (etSearchUser.text.toString().isEmpty()) {
 
-                        //Recuperar todos los usuarios menos el usuario actual
-                        if(!user!!.getUid().equals(firebaseUser)){
-                            (userList as ArrayList<User>).add(user)
+                    val myUserReference = FirebaseDatabase.getInstance().reference
+                        .child("Users")
+                        .child(firebaseUser ?: "")
+
+                    myUserReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(myUserSnapshot: DataSnapshot) {
+                            val myUser = myUserSnapshot.getValue(User::class.java)
+
+                            for (sh in snapshot.children) {
+                                val user: User? = sh.getValue(User::class.java)
+
+                                // Recuperar todos los usuarios excepto el usuario actual y los usuarios privados que no conocemos
+                                if (user != null && myUser != null &&
+                                    !user.getUid().equals(firebaseUser) &&
+                                    (!user.isPrivate() || myUser.getKnownPrivateUsers().contains(user.getUid()))) {
+
+                                    (userList as ArrayList<User>).add(user)
+                                }
+                            }
+
+                            // Pasar la lista al adaptador
+                            userAdapter = UserAdapter(
+                                context!!,
+                                userList!!,
+                                false,
+                                false,
+                                false,
+                                null
+                            )
+
+                            // Setear el adaptador al RecyclerView
+                            rvUsers!!.adapter = userAdapter
                         }
-                    }
-                    //Pasar la lista al adaptador
-                    userAdapter = UserAdapter(
-                        context!!,
-                        userList!!,
-                        false,
-                        false,
-                        false,
-                        null
-                    )
 
-                    //Seteamos el adaptador al recycleView
-                    rvUsers!!.adapter = userAdapter
+                        override fun onCancelled(myUserError: DatabaseError) {
+                        }
+                    })
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
             }
-
         }
         reference?.addValueEventListener(valueEventListener as ValueEventListener)
     }
 
-    //Se actualiza la busqueda dependiendo del termino de entrada
-    private fun searchUser(userToSearch : String){
-        val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
-        val consult = FirebaseDatabase.getInstance().reference.child("Users").orderByChild("search")
-            .startAt(userToSearch).endAt(userToSearch + "\uf8ff")
-        consult.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                (userList as ArrayList<User>).clear()
+    private fun searchUser(userToSearch: String) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val currentUserUid = firebaseUser?.uid
 
-                //Se recorre la base de datos para guardar en la lista
-                for (sh in snapshot.children){
-                    val user : User?= sh.getValue(User::class.java)
+        val myUserReference = FirebaseDatabase.getInstance().reference
+            .child("Users")
+            .child(currentUserUid ?: "")
 
-                    //Recuperar todos los usuarios menos el usuario actual
-                    if(!user!!.getUid().equals(firebaseUser)){
-                        (userList as ArrayList<User>).add(user)
+        myUserReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(myUserSnapshot: DataSnapshot) {
+                val myUser = myUserSnapshot.getValue(User::class.java)
+
+                val consult = FirebaseDatabase.getInstance().reference
+                    .child("Users")
+                    .orderByChild("search")
+                    .startAt(userToSearch)
+                    .endAt(userToSearch + "\uf8ff")
+
+                consult.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        (userList as ArrayList<User>).clear()
+
+                        for (sh in snapshot.children) {
+                            val user: User? = sh.getValue(User::class.java)
+
+                            if (user != null && myUser != null &&
+                                !user.getUid().equals(currentUserUid) &&
+                                (!user.isPrivate() || myUser.getKnownPrivateUsers().contains(user.getUid()))
+                            ) {
+                                (userList as ArrayList<User>).add(user)
+                            }
+                        }
+
+                        // Pasar la lista al adaptador
+                        userAdapter = UserAdapter(
+                            context!!,
+                            userList!!,
+                            false,
+                            false,
+                            false,
+                            null
+                        )
+
+                        // Setear el adaptador al RecyclerView
+                        rvUsers!!.adapter = userAdapter
                     }
-                }
-
-                //Pasar la lista al adaptador
-                userAdapter = UserAdapter(
-                    context!!,
-                    userList!!,
-                    false,
-                    false,
-                    false,
-                    null
-                )
-
-                //Seteamos el adaptador al recycleView
-                rvUsers!!.adapter = userAdapter
+                    override fun onCancelled(error: DatabaseError) {
+                        // Manejar errores de cancelación
+                    }
+                })
             }
-
-            override fun onCancelled(error: DatabaseError) {
+            override fun onCancelled(myUserError: DatabaseError) {
+                // Manejar errores al obtener el usuario actual
             }
-
         })
     }
+
 
 
     override fun onDestroyView() {

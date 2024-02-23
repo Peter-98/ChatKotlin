@@ -137,6 +137,11 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
                 return true
             }
+            R.id.menu_checkContacts->{
+                val intent = Intent(applicationContext, CheckContactsActivity::class.java)
+                startActivity(intent)
+                return true
+            }
             R.id.menu_about->{
                 Toast.makeText(applicationContext, "About...", Toast.LENGTH_SHORT).show()
                 return true

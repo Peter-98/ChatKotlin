@@ -58,7 +58,6 @@ class MessageActivity : AppCompatActivity() {
     private lateinit var usernameProfileChat : TextView
     private var uidUserSelected : String = ""
     private var firebaseUser : FirebaseUser ?= null
-    private lateinit var photoUri: Uri
 
     lateinit var rvChats : RecyclerView
     var chatAdapter : ChatAdapter ?= null

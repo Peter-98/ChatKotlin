@@ -47,39 +47,51 @@ class CreateGroupActivity : AppCompatActivity() {
     }
 
     private fun getUsersBd(context: Context?) {
-
         valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (userList as ArrayList<User>).clear()
+                val myUserReference = FirebaseDatabase.getInstance().reference
+                    .child("Users")
+                    .child(firebaseUser ?: "")
 
-                //Se recorre la base de datos para guardar en la lista
-                for (sh in snapshot.children){
-                    val user : User?= sh.getValue(User::class.java)
+                myUserReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(myUserSnapshot: DataSnapshot) {
+                        val myUser = myUserSnapshot.getValue(User::class.java)
 
-                    //Recuperar todos los usuarios menos el usuario actual
-                    if(!user!!.getUid().equals(firebaseUser)){
-                        (userList as ArrayList<User>).add(user)
+                        for (sh in snapshot.children) {
+                            val user: User? = sh.getValue(User::class.java)
+
+                            // Recuperar todos los usuarios excepto el usuario actual y los usuarios privados
+                            if (user != null && myUser != null &&
+                                !user.getUid().equals(firebaseUser) &&
+                                (!user.isPrivate() || myUser.getKnownPrivateUsers().contains(user.getUid()))
+                            ) {
+                                (userList as ArrayList<User>).add(user)
+                            }
+                        }
+
+                        //Pasar la lista al adaptador
+                        userAdapter = UserAdapter(
+                            context!!,
+                            userList!!,
+                            false,
+                            true,
+                            false,
+                            null
+                        )
+                        userAdapter!!.setAddGroupButton(findViewById(R.id.addGroup))
+                                    // Setear el adaptador al RecyclerView
+                                    rvUsers!!.adapter = userAdapter
                     }
-                }
 
-                //Pasar la lista al adaptador
-                userAdapter = UserAdapter(
-                    context!!,
-                    userList!!,
-                    false,
-                    true,
-                    false,
-                    null
-                )
-                userAdapter!!.setAddGroupButton(findViewById(R.id.addGroup))
+                    override fun onCancelled(myUserError: DatabaseError) {
+                    }
+                })
 
-                //Seteamos el adaptador al recycleView
-                rvUsers!!.adapter = userAdapter
             }
 
             override fun onCancelled(error: DatabaseError) {
             }
-
         }
         reference?.addValueEventListener(valueEventListener as ValueEventListener)
     }
@@ -88,18 +100,14 @@ class CreateGroupActivity : AppCompatActivity() {
 
     fun createGroup(groupChat: GroupChat) {
         val reference = FirebaseDatabase.getInstance().reference
-
-        // Concatenar los identificadores de los receptores en una sola cadena usando un delimitador específico
-        //val receiverId = uidReceiver?.joinToString("-")
-
         val groupInfo = HashMap<String, Any?>()
+
         groupInfo["uidGroup"] = groupChat.getUidGroup()
         groupInfo["image"] = groupChat.getImage()
         groupInfo["name"] = groupChat.getName()
         groupInfo["uidUsersList"] = groupChat.getUidUsersList()
         groupInfo["colorUsersList"] =  assignRandomColorsToUsers(groupChat.getUidUsersList()!!)
 
-        // Guardar información del grupo en la base de datos
         reference.child("Groups").child(groupChat.getUidGroup()!!).setValue(groupInfo)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -120,8 +128,6 @@ class CreateGroupActivity : AppCompatActivity() {
                                 }
                             }
                     }
-                } else {
-                    // Manejar errores al crear el grupo en la base de datos "Groups"
                 }
             }
     }

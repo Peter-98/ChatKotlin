@@ -13,6 +13,8 @@ class User {
     private var phone : String = ""
     private var status : String = ""
     private var provider : String = ""
+    private var private : Boolean = true
+    private var knownPrivateUsers : List<String> = emptyList()
 
     constructor()
 
@@ -27,7 +29,9 @@ class User {
         age: String,
         phone: String,
         status: String,
-        provider: String
+        provider: String,
+        private: Boolean,
+        knownPrivateUsers: List<String>
     ) {
         this.uid = uid
         this.username = username
@@ -40,6 +44,8 @@ class User {
         this.phone = phone
         this.status = status
         this.provider = provider
+        this.private = private
+        this.knownPrivateUsers = knownPrivateUsers
     }
 
     //getters y setters
@@ -129,5 +135,21 @@ class User {
 
     fun setProvider(provider : String){
         this.provider = provider
+    }
+
+    fun isPrivate() : Boolean{
+        return private
+    }
+
+    fun setPrivate(private : Boolean){
+        this.private = private
+    }
+
+    fun getKnownPrivateUsers() : List<String>{
+        return knownPrivateUsers
+    }
+
+    fun setKnownPrivateUsers(knownPrivateUsers : List<String>){
+        this.knownPrivateUsers = knownPrivateUsers
     }
 }

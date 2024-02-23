@@ -45,7 +45,8 @@ class SelectDataGroup  : AppCompatActivity(){
         const val REQUEST_IMAGE_CAPTURE = 1
         const val REQUEST_IMAGE_PICK = 2
         const val REQUEST_DOCUMENT_PICK = 3
-        const val REQUEST_WRITE_EXTERNAL_STORAGE = 4
+        const val REQUEST_CODE_PICK_LOCATION = 4
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

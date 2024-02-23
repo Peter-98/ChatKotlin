@@ -6,6 +6,7 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Location
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -22,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -366,7 +368,7 @@ class MessageGroupActivity : AppCompatActivity(){
         rvChats.layoutManager = linearLayoutManager
     }
     private fun selectAction() {
-        val items = arrayOf("Take Photo", "Choose from Gallery", "Select document")
+        val items = arrayOf("Take Photo", "Choose from Gallery", "Select document", "Send location")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle("Select Image")
@@ -375,9 +377,15 @@ class MessageGroupActivity : AppCompatActivity(){
                 0 -> dispatchTakePictureIntent()
                 1 -> dispatchPickImageIntent()
                 2 -> dispatchPickDocumentIntent()
+                3 -> dispatchPickLocationIntent()
             }
         }
         builder.show()
+    }
+
+    private fun dispatchPickLocationIntent() {
+        val intent = Intent(this, SendLocationActivity::class.java)
+        startActivityForResult(intent, SelectDataGroup.REQUEST_CODE_PICK_LOCATION)
     }
 
     private fun dispatchPickDocumentIntent() {
@@ -437,6 +445,13 @@ class MessageGroupActivity : AppCompatActivity(){
                     selectedDocumentUri?.let { uri ->
                         handleImageSelection(null, uri)
                     }
+                }
+                SelectDataGroup.REQUEST_CODE_PICK_LOCATION  -> {
+
+                    val latitude = data?.getDoubleExtra("latitude", 0.0)
+                    val longitude = data?.getDoubleExtra("longitude", 0.0)
+                    val url = data?.getStringExtra("url")
+
                 }
             }
         }
