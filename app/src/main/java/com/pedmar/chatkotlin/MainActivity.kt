@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
@@ -21,6 +22,7 @@ import com.pedmar.chatkotlin.fragments.ChatsFragment
 import com.pedmar.chatkotlin.fragments.UsersFragment
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
+import com.pedmar.chatkotlin.profile.EditImageProfileActivity
 import com.pedmar.chatkotlin.profile.ProfileActivity
 
 class MainActivity : AppCompatActivity() {
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     var reference : DatabaseReference?=null //No es null
     var firebaseUser : FirebaseUser?=null //No es null
     private lateinit var username : TextView
+    private lateinit var qrCode : ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         val tabLayout : TabLayout = findViewById(R.id.TabLayoutMain)
         val viewPager : ViewPager = findViewById(R.id.ViewPagerMain)
+        qrCode = findViewById(R.id.qrCode)
 
         val ref = FirebaseDatabase.getInstance().reference.child("Chats")
         ref.addValueEventListener(object : ValueEventListener{
@@ -80,6 +84,12 @@ class MainActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
         })
+
+        qrCode.setOnClickListener {
+            val intent = Intent(applicationContext, QrCodeActivity::class.java)
+            intent.putExtra("share", true)
+            startActivity(intent)
+        }
     }
 
     private fun getData(){
@@ -154,7 +164,9 @@ class MainActivity : AppCompatActivity() {
                 // Finalizar la actividad actual para que no aparezca en la pila de actividades
                 finish()
                 return true
-            }else-> super.onOptionsItemSelected(item)
+
+            }
+            else-> super.onOptionsItemSelected(item)
         }
     }
 
