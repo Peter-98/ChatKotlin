@@ -36,6 +36,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initializeComponents()
         getData()
+
+        val intent = intent
+        val action = intent.action
+        val data = intent.data
+
+        if (Intent.ACTION_VIEW == action && data != null) {
+            val qrData = data.lastPathSegment
+            // Aquí puedes procesar los datos del QR recibidos
+            Toast.makeText(this, "Datos del QR: $qrData", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun initializeComponents() {

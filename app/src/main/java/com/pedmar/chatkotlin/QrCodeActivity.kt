@@ -26,6 +26,7 @@ import com.google.zxing.integration.android.IntentResult
 import com.pedmar.chatkotlin.adapter.CardAdapter
 import com.pedmar.chatkotlin.model.QrData
 import com.pedmar.chatkotlin.model.User
+import java.security.MessageDigest
 import java.util.*
 
 class QrCodeActivity : AppCompatActivity() {
@@ -116,7 +117,10 @@ class QrCodeActivity : AppCompatActivity() {
 
     private fun generateQRCode(userDataUid: String): Bitmap? {
 
-        val qrDataDatabase = parseJsonToQrData(userData.getQrMark()!!)
+        var qrDataDatabase = parseJsonToQrData(userData.getQrMark()!!)
+        if (qrDataDatabase == null) {
+            qrDataDatabase = QrData("", "")
+        }
 
         val qrData: QrData = if (share) {
             QrData("${userDataUid}_${System.currentTimeMillis()}", qrDataDatabase!!.getQrLogin())
@@ -169,6 +173,9 @@ class QrCodeActivity : AppCompatActivity() {
         val scaledLogoBitmap =
             Bitmap.createScaledBitmap(logoBitmap, qrCodeWidth / 4, qrCodeHeight / 4, false)
 
+        val uniqueUrl = generateUniqueUrlFromData(jsonData)
+        println("URL única generada: $uniqueUrl")
+
         saveQrMark(jsonData)
         return combineBitmaps(bitmap, scaledLogoBitmap)
     }
@@ -203,6 +210,37 @@ class QrCodeActivity : AppCompatActivity() {
         })
     }
 
+    private fun saveQrDataUser(data: String) {
+        reference!!.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val userPrimary = dataSnapshot.getValue(User::class.java)
+
+                val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(
+                    data!!.split("-")[0]
+                )
+                userReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(userSnapshot: DataSnapshot) {
+                        val userSecondary = userSnapshot.getValue(User::class.java)
+
+                        if (userPrimary != null && userSecondary != null &&
+                            !userPrimary.getKnownPrivateUsers().contains(userSecondary.getUid())
+                            && parseJsonToQrData(data)!!.getQrDataShare() == parseJsonToQrData(userSecondary.getQrMark()!!)!!.getQrDataShare()
+                        ) {
+                            val hashMap = HashMap<String, Any>()
+                            hashMap["knownPrivateUsers"] = userPrimary.getKnownPrivateUsers() + data
+                            dataSnapshot.ref.updateChildren(hashMap)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+                })
+            }
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
     private fun parseJsonToQrData(jsonData: String): QrData? {
         val gson = Gson()
         return try {
@@ -213,12 +251,33 @@ class QrCodeActivity : AppCompatActivity() {
         }
     }
 
+    private fun generateUniqueUrlFromData(qrData: String): String {
+        // Obtener el objeto MessageDigest para SHA-256
+        val digest = MessageDigest.getInstance("SHA-256")
+        // Calcular el hash de los datos del QR
+        val hashBytes = digest.digest(qrData.toByteArray())
+        // Convertir el hash a una cadena hexadecimal
+        val hexString = StringBuilder()
+        for (byte in hashBytes) {
+            val hex = Integer.toHexString(0xff and byte.toInt())
+            if (hex.length == 1) hexString.append('0')
+            hexString.append(hex)
+        }
+        // Devolver la URL única basada en el hash
+        return "miapp://${userData.getUsername()}/${hexString.toString()}"
+    }
+
     private fun startQRCodeScanner() {
         val integrator = IntentIntegrator(this)
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
         integrator.setBeepEnabled(false)
         integrator.setOrientationLocked(true)
         integrator.initiateScan()
+        initScanner()
+    }
+
+    private fun initScanner() {
+        IntentIntegrator(this).initiateScan()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -228,6 +287,8 @@ class QrCodeActivity : AppCompatActivity() {
         if (result != null) {
             if (result.contents != null) {
                 Toast.makeText(this, result.contents, Toast.LENGTH_SHORT).show()
+
+                saveQrDataUser(result.contents)
                 scannedCards.add(result.contents)
                 cardAdapter.notifyDataSetChanged()
             } else {
@@ -237,5 +298,6 @@ class QrCodeActivity : AppCompatActivity() {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
+
 
 }
