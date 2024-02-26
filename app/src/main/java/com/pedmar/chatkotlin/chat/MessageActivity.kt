@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -15,12 +14,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,28 +42,26 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class MessageActivity : AppCompatActivity() {
 
-    private lateinit var etMessage : EditText
-    private lateinit var ibSend : ImageButton
-    private lateinit var ibInclude : ImageButton
-    private lateinit var imageProfileChat : ImageView
-    private lateinit var usernameProfileChat : TextView
-    private var uidUserSelected : String = ""
-    private var firebaseUser : FirebaseUser ?= null
+    private lateinit var etMessage: EditText
+    private lateinit var ibSend: ImageButton
+    private lateinit var ibInclude: ImageButton
+    private lateinit var imageProfileChat: ImageView
+    private lateinit var usernameProfileChat: TextView
+    private var uidUserSelected: String = ""
+    private var firebaseUser: FirebaseUser? = null
 
-    lateinit var rvChats : RecyclerView
-    var chatAdapter : ChatAdapter ?= null
-    var chatList : List<Chat> ?= null
+    lateinit var rvChats: RecyclerView
+    var chatAdapter: ChatAdapter? = null
+    var chatList: List<Chat>? = null
 
-    var reference : DatabaseReference ?= null
-    var seenListener : ValueEventListener ?= null
+    var reference: DatabaseReference? = null
+    var seenListener: ValueEventListener? = null
 
     var notify = false
-    var apiService : APIService?=null
+    var apiService: APIService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,20 +73,25 @@ class MessageActivity : AppCompatActivity() {
         ibInclude.setOnClickListener {
             notify = true
 
-            if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED){
+            if (ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                ) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
                 selectAction()
-            }else{
+            } else {
                 requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
 
-        ibSend.setOnClickListener{
+        ibSend.setOnClickListener {
             notify = true
             val message = etMessage.text.toString()
-            if (message.isEmpty()){
-                Toast.makeText(applicationContext, "Please enter a message", Toast.LENGTH_SHORT).show()
-            }else{
+            if (message.isEmpty()) {
+                Toast.makeText(applicationContext, "Please enter a message", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
                 sendMessage(firebaseUser!!.uid, uidUserSelected, message)
                 etMessage.setText("")
             }
@@ -102,8 +101,7 @@ class MessageActivity : AppCompatActivity() {
     }
 
 
-
-    private fun getUid(){
+    private fun getUid() {
         intent = intent
         uidUserSelected = intent.getStringExtra("userUid").toString()
     }
@@ -120,37 +118,41 @@ class MessageActivity : AppCompatActivity() {
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
         infoMessage["groupChat"] = false
-        reference.child("Chats").child(keyMessage!!).setValue(infoMessage).addOnCompleteListener{task->
-            if (task.isSuccessful){
-                val listMessageIssuer = FirebaseDatabase.getInstance().reference.child("MessageList")
-                    .child(firebaseUser!!.uid)
-                    .child(uidUserSelected)
-
-                listMessageIssuer.addListenerForSingleValueEvent(object : ValueEventListener{
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        if (!snapshot.exists()){
-                            listMessageIssuer.child("uid").setValue(uidUserSelected)
-                        }
-                        val listMessageReceiver = FirebaseDatabase.getInstance().reference.child("MessageList")
-                            .child(uidUserSelected)
+        reference.child("Chats").child(keyMessage!!).setValue(infoMessage)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val listMessageIssuer =
+                        FirebaseDatabase.getInstance().reference.child("MessageList")
                             .child(firebaseUser!!.uid)
-                        listMessageReceiver.child("uid").setValue(firebaseUser!!.uid)
-                    }
+                            .child(uidUserSelected)
 
-                    override fun onCancelled(error: DatabaseError) {
-                    }
+                    listMessageIssuer.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (!snapshot.exists()) {
+                                listMessageIssuer.child("uid").setValue(uidUserSelected)
+                            }
+                            val listMessageReceiver =
+                                FirebaseDatabase.getInstance().reference.child("MessageList")
+                                    .child(uidUserSelected)
+                                    .child(firebaseUser!!.uid)
+                            listMessageReceiver.child("uid").setValue(firebaseUser!!.uid)
+                        }
 
-                })
+                        override fun onCancelled(error: DatabaseError) {
+                        }
+
+                    })
+                }
+
             }
 
-        }
-
-        val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
-        userReference.addValueEventListener(object  : ValueEventListener{
+        val userReference =
+            FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        userReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-               val user = snapshot.getValue(User::class.java)
-                if (notify){
-                    sendNotification(uidReceiver, user!!.getUsername(),message)
+                val user = snapshot.getValue(User::class.java)
+                if (notify) {
+                    sendNotification(uidReceiver, user!!.getUsername(), message)
                 }
                 notify = false
             }
@@ -166,30 +168,37 @@ class MessageActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().reference.child("Tokens")
         val query = reference.orderByKey().equalTo(uidReceiver)
 
-        query.addValueEventListener(object : ValueEventListener{
+        query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-               for (dataSnapshot in snapshot.children){
-                   val token : Token?= dataSnapshot.getValue(Token::class.java)
+                for (dataSnapshot in snapshot.children) {
+                    val token: Token? = dataSnapshot.getValue(Token::class.java)
 
-                   val data = Data(firebaseUser!!.uid, R.mipmap.ic_chat, "$username: $message","New message", uidUserSelected)
-                   val sender = Sender(data!!, token!!.getToken().toString())
+                    val data = Data(
+                        firebaseUser!!.uid,
+                        R.mipmap.ic_chat,
+                        "$username: $message",
+                        "New message",
+                        uidUserSelected
+                    )
+                    val sender = Sender(data!!, token!!.getToken().toString())
 
-                   apiService!!.sendNotification(sender).enqueue(object: Callback<MyResponse>{
-                       override fun onResponse(
-                           call: Call<MyResponse>,
-                           response: Response<MyResponse>
-                       ) {
-                           if(response.code() == 200){
-                               if (response.body()!!.success !==1){
-                                   Log.d("NOTIFICATION", "Error sending notification to user")
-                                   //Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
-                               }
-                           }
-                       }
-                       override fun onFailure(call: Call<MyResponse>, t: Throwable) {
-                       }
-                   })
-               }
+                    apiService!!.sendNotification(sender).enqueue(object : Callback<MyResponse> {
+                        override fun onResponse(
+                            call: Call<MyResponse>,
+                            response: Response<MyResponse>
+                        ) {
+                            if (response.code() == 200) {
+                                if (response.body()!!.success !== 1) {
+                                    Log.d("NOTIFICATION", "Error sending notification to user")
+                                    //Toast.makeText(applicationContext,"An error has occurred", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<MyResponse>, t: Throwable) {
+                        }
+                    })
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -197,16 +206,18 @@ class MessageActivity : AppCompatActivity() {
         })
     }
 
-    private fun getDataUserSelected(){
-        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(uidUserSelected)
-        reference.addValueEventListener(object : ValueEventListener{
+    private fun getDataUserSelected() {
+        val reference =
+            FirebaseDatabase.getInstance().reference.child("Users").child(uidUserSelected)
+        reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val user : User? = snapshot.getValue(User::class.java)
+                val user: User? = snapshot.getValue(User::class.java)
                 //Obtener nombre del usuario
                 usernameProfileChat.text = user!!.getUsername()
 
                 //Obtener imagen de perfil
-                Glide.with(applicationContext).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(imageProfileChat)
+                Glide.with(applicationContext).load(user.getImage())
+                    .placeholder(R.drawable.ic_item_user).into(imageProfileChat)
 
                 getMessages(firebaseUser!!.uid, uidUserSelected, user.getImage())
             }
@@ -217,13 +228,15 @@ class MessageActivity : AppCompatActivity() {
         })
     }
 
-    private fun viewedMessage(userUid : String){
+    private fun viewedMessage(userUid: String) {
         reference = FirebaseDatabase.getInstance().reference.child("Chats")
-        seenListener = reference!!.addValueEventListener(object : ValueEventListener{
+        seenListener = reference!!.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for (dataSnapshot in snapshot.children){
+                for (dataSnapshot in snapshot.children) {
                     val chat = dataSnapshot.getValue(Chat::class.java)
-                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getIssuer().equals(userUid)){
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getIssuer()
+                            .equals(userUid)
+                    ) {
                         val hashMap = HashMap<String, Any>()
                         hashMap["viewed"] = true
                         dataSnapshot.ref.updateChildren(hashMap)
@@ -239,14 +252,17 @@ class MessageActivity : AppCompatActivity() {
     private fun getMessages(issuerUid: String, receiverUid: String, receiverImage: String?) {
         chatList = ArrayList()
         val reference = FirebaseDatabase.getInstance().reference.child("Chats")
-        reference.addValueEventListener(object : ValueEventListener{
+        reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 (chatList as ArrayList<Chat>).clear()
-                for (sn in snapshot.children){
+                for (sn in snapshot.children) {
                     val chat = sn.getValue(Chat::class.java)
 
-                    if(chat!!.getReceiver().equals(issuerUid) && chat.getIssuer().equals(receiverUid)
-                        || chat.getReceiver().equals(receiverUid) && chat.getIssuer().equals(issuerUid)){
+                    if (chat!!.getReceiver().equals(issuerUid) && chat.getIssuer()
+                            .equals(receiverUid)
+                        || chat.getReceiver().equals(receiverUid) && chat.getIssuer()
+                            .equals(issuerUid)
+                    ) {
                         (chatList as ArrayList<Chat>).add(chat)
                     }
 
@@ -266,13 +282,14 @@ class MessageActivity : AppCompatActivity() {
         })
     }
 
-    private fun initializeVariables(){
+    private fun initializeVariables() {
 
-        val toolbar : Toolbar = findViewById(R.id.toolbarChat)
+        val toolbar: Toolbar = findViewById(R.id.toolbarChat)
         setSupportActionBar(toolbar)
         supportActionBar!!.title = ""
 
-        apiService = Client.Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
+        apiService =
+            Client.Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
 
         etMessage = findViewById(R.id.etMessage)
         ibSend = findViewById(R.id.iBSend)
@@ -304,7 +321,11 @@ class MessageActivity : AppCompatActivity() {
     }
 
     private fun dispatchPickDocumentIntent() {
-        if (ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val pickDocumentIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             pickDocumentIntent.type = "*/*"
             startActivityForResult(pickDocumentIntent, SelectDataGroup.REQUEST_DOCUMENT_PICK)
@@ -312,33 +333,42 @@ class MessageActivity : AppCompatActivity() {
             requestDocumentPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }
+
     private fun dispatchTakePictureIntent() {
-        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                android.Manifest.permission.CAMERA
+            ) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
             val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             try {
-                startActivityForResult(takePictureIntent,
+                startActivityForResult(
+                    takePictureIntent,
                     SelectDataGroup.REQUEST_IMAGE_CAPTURE
                 )
             } catch (e: Exception) {
                 Toast.makeText(applicationContext, "Camera Not Available", Toast.LENGTH_SHORT)
                     .show()
             }
-        }else{
+        } else {
             requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
     }
 
 
-
-
     private fun dispatchPickImageIntent() {
-        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
-            PackageManager.PERMISSION_GRANTED){
-            val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            val pickImageIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             pickImageIntent.type = "image/*"
             startActivityForResult(pickImageIntent, SelectDataGroup.REQUEST_IMAGE_PICK)
-        }else{
+        } else {
             requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }
@@ -355,7 +385,8 @@ class MessageActivity : AppCompatActivity() {
                 }
                 SelectDataGroup.REQUEST_IMAGE_PICK -> {
                     val selectedImage = data?.data
-                    val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
+                    val imageBitmap =
+                        MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
                     handleImageSelection(imageBitmap, null)
                 }
                 SelectDataGroup.REQUEST_DOCUMENT_PICK -> {
@@ -379,15 +410,15 @@ class MessageActivity : AppCompatActivity() {
 
         var uploadTask: StorageTask<*>? = null
         var imageFolder: StorageReference? = null
-        var ref : StorageReference? = null
+        var ref: StorageReference? = null
 
-        if(documentUri != null){
+        if (documentUri != null) {
             imageFolder = FirebaseStorage.getInstance().reference.child("Messages documents")
             // Obtener el nombre del archivo original
             ref = imageFolder.child("$keyMessage")
             uploadTask = ref.putFile(documentUri)
 
-        }else{
+        } else {
             imageFolder = FirebaseStorage.getInstance().reference.child("Messages images")
             ref = imageFolder.child("$keyMessage.png")
 
@@ -420,25 +451,32 @@ class MessageActivity : AppCompatActivity() {
                 infoMessageImage["viewed"] = false
                 infoMessageImage["groupChat"] = false
 
-                if(documentUri != null){
+                if (documentUri != null) {
                     infoMessageImage["message"] = "File: ${getFileNameFromUri(documentUri)}"
-                }else{
+                } else {
                     infoMessageImage["message"] = "Submitted image"
                 }
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
-                    .addOnCompleteListener { task->
-                        if (task.isSuccessful){
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
 
-                            val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
-                            userReference.addValueEventListener(object  : ValueEventListener{
+                            val userReference =
+                                FirebaseDatabase.getInstance().reference.child("Users")
+                                    .child(firebaseUser!!.uid)
+                            userReference.addValueEventListener(object : ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     val user = snapshot.getValue(User::class.java)
-                                    if (notify){
-                                        sendNotification(uidUserSelected, user!!.getUsername(),"Submitted image")
+                                    if (notify) {
+                                        sendNotification(
+                                            uidUserSelected,
+                                            user!!.getUsername(),
+                                            "Submitted image"
+                                        )
                                     }
                                     notify = false
                                 }
+
                                 override fun onCancelled(error: DatabaseError) {
                                 }
                             })
@@ -453,7 +491,8 @@ class MessageActivity : AppCompatActivity() {
                                     .child(firebaseUser!!.uid)
                                     .child(uidUserSelected)
 
-                            listMessageIssuer.addListenerForSingleValueEvent(object : ValueEventListener {
+                            listMessageIssuer.addListenerForSingleValueEvent(object :
+                                ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     if (!snapshot.exists()) {
                                         listMessageIssuer.child("uid").setValue(uidUserSelected)
@@ -492,29 +531,41 @@ class MessageActivity : AppCompatActivity() {
     }
 
     private val requestDocumentPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
-            if (permission_granted){
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { permission_granted ->
+            if (permission_granted) {
                 dispatchPickDocumentIntent()
-            }else{
-                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Permission has not been granted",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
     private val requestGalleryPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
-            if (permission_granted){
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { permission_granted ->
+            if (permission_granted) {
                 selectAction()
-            }else{
-                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Permission has not been granted",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
     private val requestCameraPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
-            if (permission_granted){
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { permission_granted ->
+            if (permission_granted) {
                 dispatchTakePictureIntent()
-            }else{
-                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Permission has not been granted",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
         }
@@ -527,24 +578,26 @@ class MessageActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater : MenuInflater = menuInflater
+        val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_visit_profile, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId){
-            R.id.menu_visit_profile->{
+        return when (item.itemId) {
+            R.id.menu_visit_profile -> {
                 val intent = Intent(applicationContext, VisitedProfileActivity::class.java)
                 intent.putExtra("uid", uidUserSelected)
                 startActivity(intent)
                 return true
-            }else -> super.onOptionsItemSelected(item)
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun updateStatus(status : String){
-        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+    private fun updateStatus(status: String) {
+        val reference =
+            FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
         val hashMap = HashMap<String, Any>()
         hashMap["status"] = status
         reference!!.updateChildren(hashMap)

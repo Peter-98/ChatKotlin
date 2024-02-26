@@ -1,7 +1,6 @@
 package com.pedmar.chatkotlin
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -9,6 +8,7 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -22,15 +22,14 @@ import com.pedmar.chatkotlin.fragments.ChatsFragment
 import com.pedmar.chatkotlin.fragments.UsersFragment
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
-import com.pedmar.chatkotlin.profile.EditImageProfileActivity
 import com.pedmar.chatkotlin.profile.ProfileActivity
 
 class MainActivity : AppCompatActivity() {
 
-    var reference : DatabaseReference?=null //No es null
-    var firebaseUser : FirebaseUser?=null //No es null
-    private lateinit var username : TextView
-    private lateinit var qrCode : ImageView
+    var reference: DatabaseReference? = null //No es null
+    var firebaseUser: FirebaseUser? = null //No es null
+    private lateinit var username: TextView
+    private lateinit var qrCode: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,38 +38,39 @@ class MainActivity : AppCompatActivity() {
         getData()
     }
 
-    private fun initializeComponents(){
+    private fun initializeComponents() {
 
-        var toolbar : Toolbar = findViewById(R.id.toolbarMain)
+        var toolbar: Toolbar = findViewById(R.id.toolbarMain)
         setSupportActionBar(toolbar)
         supportActionBar!!.title = ""
 
         firebaseUser = FirebaseAuth.getInstance().currentUser
-        reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+        reference =
+            FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
         username = findViewById(R.id.username)
 
-        val tabLayout : TabLayout = findViewById(R.id.TabLayoutMain)
-        val viewPager : ViewPager = findViewById(R.id.ViewPagerMain)
+        val tabLayout: TabLayout = findViewById(R.id.TabLayoutMain)
+        val viewPager: ViewPager = findViewById(R.id.ViewPagerMain)
         qrCode = findViewById(R.id.qrCode)
 
         val ref = FirebaseDatabase.getInstance().reference.child("Chats")
-        ref.addValueEventListener(object : ValueEventListener{
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 //Inicializar adaptador
                 val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
                 var countUnreadMessage = 0
-                for (dataSnapshot in snapshot.children){
+                for (dataSnapshot in snapshot.children) {
                     val chat = dataSnapshot.getValue(Chat::class.java)
-                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isViewed()){
-                        countUnreadMessage+=1
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isViewed()) {
+                        countUnreadMessage += 1
                     }
                 }
 
                 //Agregar los fragmentos al adaptador
-                if (countUnreadMessage == 0){
+                if (countUnreadMessage == 0) {
                     viewPagerAdapter.addItem(ChatsFragment(), "Chats")
-                }else{
+                } else {
                     viewPagerAdapter.addItem(ChatsFragment(), "[$countUnreadMessage] Chats")
                 }
                 viewPagerAdapter.addItem(UsersFragment(), "Users")
@@ -92,13 +92,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getData(){
-        reference!!.addValueEventListener(object : ValueEventListener{
+    private fun getData() {
+        reference!!.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 //Si el usuario existe
-                if (snapshot.exists()){
-                    val user : User? = snapshot.getValue(User::class.java)
+                if (snapshot.exists()) {
+                    val user: User? = snapshot.getValue(User::class.java)
                     username.text = user!!.getUsername()
                 }
             }
@@ -109,16 +109,17 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    class ViewPagerAdapter(fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager) {
+    class ViewPagerAdapter(fragmentManager: FragmentManager) :
+        FragmentPagerAdapter(fragmentManager) {
 
-        private val fragmentList : MutableList<Fragment> = ArrayList()
-        private val titlesList : MutableList<String> = ArrayList()
+        private val fragmentList: MutableList<Fragment> = ArrayList()
+        private val titlesList: MutableList<String> = ArrayList()
         override fun getCount(): Int {
-          return fragmentList.size
+            return fragmentList.size
         }
 
         override fun getItem(position: Int): Fragment {
-           return fragmentList[position]
+            return fragmentList[position]
         }
 
         //Cambiar nombre de la stat
@@ -126,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             return titlesList[position]
         }
 
-        fun addItem(fragment: Fragment, titulo: String){
+        fun addItem(fragment: Fragment, titulo: String) {
             fragmentList.add(fragment)
             titlesList.add(titulo)
         }
@@ -134,29 +135,29 @@ class MainActivity : AppCompatActivity() {
 
     //Ver menu cerrar sesion
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater : MenuInflater = menuInflater
+        val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_principal, menu)
         return true;
     }
 
     //Seleccionar menu lateral
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId){
-            R.id.menu_profile->{
+        return when (item.itemId) {
+            R.id.menu_profile -> {
                 val intent = Intent(applicationContext, ProfileActivity::class.java)
                 startActivity(intent)
                 return true
             }
-            R.id.menu_checkContacts->{
+            R.id.menu_checkContacts -> {
                 val intent = Intent(applicationContext, CheckContactsActivity::class.java)
                 startActivity(intent)
                 return true
             }
-            R.id.menu_about->{
+            R.id.menu_about -> {
                 Toast.makeText(applicationContext, "About...", Toast.LENGTH_SHORT).show()
                 return true
             }
-            R.id.menu_exit->{
+            R.id.menu_exit -> {
                 FirebaseAuth.getInstance().signOut()
                 val intent = Intent(this@MainActivity, Inicio::class.java)
                 Toast.makeText(applicationContext, "You have logged out", Toast.LENGTH_SHORT).show()
@@ -166,12 +167,13 @@ class MainActivity : AppCompatActivity() {
                 return true
 
             }
-            else-> super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun updateStatus(status : String){
-        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+    private fun updateStatus(status: String) {
+        val reference =
+            FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
         val hashMap = HashMap<String, Any>()
         hashMap["status"] = status
         reference!!.updateChildren(hashMap)
@@ -181,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         updateStatus("online")
     }
+
     override fun onPause() {
         super.onPause()
         updateStatus("offline")
