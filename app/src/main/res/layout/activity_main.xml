@@ -26,14 +26,15 @@
                 android:layout_height="wrap_content">
             </TextView>
 
-            <!-- Nuevo icono para la actividad -->
             <ImageView
                 android:id="@+id/qrCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_check"
+                android:layout_width="50dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_share_profile"
                 android:padding="8dp"
-                android:clickable="true" />
+                android:clickable="true"
+                app:tint="@android:color/white"
+                android:layout_gravity="end"/>
 
         </androidx.appcompat.widget.Toolbar>
 

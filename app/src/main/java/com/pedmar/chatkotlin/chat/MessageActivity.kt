@@ -31,6 +31,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
+import com.pedmar.chatkotlin.MainActivity
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.adapter.ChatAdapter
 import com.pedmar.chatkotlin.group.SelectDataGroup
@@ -570,13 +571,6 @@ class MessageActivity : AppCompatActivity() {
 
         }
 
-    //Detiene la tarea de actualizar viewed de false a true
-    override fun onPause() {
-        super.onPause()
-        reference!!.removeEventListener(seenListener!!)
-        updateStatus("offline")
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_visit_profile, menu)
@@ -606,5 +600,17 @@ class MessageActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateStatus("online")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        reference!!.removeEventListener(seenListener!!)
+        updateStatus("offline")
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

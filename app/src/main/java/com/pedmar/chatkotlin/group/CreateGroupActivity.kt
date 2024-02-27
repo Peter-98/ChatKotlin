@@ -52,7 +52,7 @@ class CreateGroupActivity : AppCompatActivity() {
                 (userList as ArrayList<User>).clear()
                 val myUserReference = FirebaseDatabase.getInstance().reference
                     .child("Users")
-                    .child(firebaseUser ?: "")
+                    .child(firebaseUser)
 
                 myUserReference.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(myUserSnapshot: DataSnapshot) {
@@ -93,7 +93,7 @@ class CreateGroupActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
         }
-        reference?.addValueEventListener(valueEventListener as ValueEventListener)
+        reference.addValueEventListener(valueEventListener as ValueEventListener)
     }
 
 
@@ -132,7 +132,7 @@ class CreateGroupActivity : AppCompatActivity() {
             }
     }
 
-    fun assignRandomColorsToUsers(userIds: List<String>): Map<String, Long> {
+    private fun assignRandomColorsToUsers(userIds: List<String>): Map<String, Long> {
         val userColorsMap = mutableMapOf<String, Long>()
         val usedColors = mutableSetOf<Long>()
 
@@ -152,7 +152,7 @@ class CreateGroupActivity : AppCompatActivity() {
         return userColorsMap
     }
 
-    fun generateRandomColor(): Int {
+    private fun generateRandomColor(): Int {
         val random = Random()
         return Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256))
     }
