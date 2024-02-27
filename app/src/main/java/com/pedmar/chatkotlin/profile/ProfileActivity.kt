@@ -1,19 +1,26 @@
 package com.pedmar.chatkotlin.profile
 
+import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import com.hbb20.CountryCodePicker
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.User
@@ -42,7 +49,12 @@ class ProfileActivity : AppCompatActivity() {
     private var phoneCodeNumber = ""
 
     private lateinit var progressDialog: ProgressDialog
+    private lateinit var firebaseAuth : FirebaseAuth
 
+    companion object {
+        const val REQUEST_IMAGE_CAPTURE = 1
+        const val REQUEST_IMAGE_PICK = 2
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
@@ -55,24 +67,7 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         image.setOnClickListener{
-            val intent = Intent(applicationContext, EditImageProfileActivity::class.java)
-
-            // Obtén el Drawable de la ImageView
-            val drawable = image.drawable
-
-            // Convierte el Drawable a un Bitmap si es posible
-            if (drawable is BitmapDrawable) {
-                val bitmap = drawable.bitmap
-
-                // Convierte el Bitmap a ByteArray
-                val stream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                val byteArray = stream.toByteArray()
-
-                // Pasa el ByteArray a la actividad
-                intent.putExtra("imageByteArray", byteArray)
-            }
-            startActivity(intent)
+            showImageSelectionDialog()
         }
 
         editPhone.setOnClickListener{
@@ -179,6 +174,7 @@ class ProfileActivity : AppCompatActivity() {
         progressDialog.setCanceledOnTouchOutside(false)
 
         user = FirebaseAuth.getInstance().currentUser
+        firebaseAuth = FirebaseAuth.getInstance()
         reference = FirebaseDatabase.getInstance().reference.child("Users").child(user!!.uid)
     }
 
@@ -255,4 +251,131 @@ class ProfileActivity : AppCompatActivity() {
         super.onPause()
         updateStatus("offline")
     }
+
+    private fun showImageSelectionDialog() {
+        val items = arrayOf("Take Photo", "Choose from Gallery")
+
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Select Image")
+        builder.setItems(items) { dialog, which ->
+            when (which) {
+                0 -> dispatchTakePictureIntent()
+                1 -> dispatchPickImageIntent()
+            }
+        }
+        builder.show()
+    }
+
+    private fun dispatchTakePictureIntent() {
+        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED) {
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            try {
+                startActivityForResult(takePictureIntent,
+                    REQUEST_IMAGE_CAPTURE
+                )
+            } catch (e: Exception) {
+                Toast.makeText(applicationContext, "Camera Not Available", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }else{
+            requestCameraPermission.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+
+    private fun dispatchPickImageIntent() {
+        if(ContextCompat.checkSelfPermission(applicationContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+            PackageManager.PERMISSION_GRANTED){
+            val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            pickImageIntent.type = "image/*"
+            startActivityForResult(pickImageIntent, REQUEST_IMAGE_PICK)
+        }else{
+            requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                REQUEST_IMAGE_CAPTURE -> {
+                    val imageBitmap = data?.extras?.get("data") as Bitmap
+                    //updateImageProfile.setImageBitmap(imageBitmap)
+                    updateByteArray(imageBitmap)
+                }
+                REQUEST_IMAGE_PICK -> {
+                    val selectedImage = data?.data
+                    val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
+                    //updateImageProfile.setImageBitmap(imageBitmap)
+                    updateByteArray(imageBitmap)
+                }
+            }
+        }
+    }
+
+    private fun updateByteArray(bitmap: Bitmap) {
+        // Convierte el Bitmap a ByteArray
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+
+        val pathImage = "Profile/${firebaseAuth.uid}.png"
+        val referenceStorage = FirebaseStorage.getInstance().getReference(pathImage)
+
+        // Sube el ByteArray al almacenamiento de Firebase
+        val uploadTask = referenceStorage.putBytes(byteArray)
+
+        // Muestra un diálogo de progreso mientras se carga la imagen
+        progressDialog.setMessage("Uploading Image...")
+        progressDialog.show()
+
+        // Maneja el resultado de la carga
+        uploadTask.addOnSuccessListener { taskSnapshot ->
+            // Cierre el diálogo de progreso
+            progressDialog.dismiss()
+
+            // Obtiene la URL de descarga de la imagen cargada
+            referenceStorage.downloadUrl.addOnSuccessListener { uri ->
+                // Aquí puedes hacer algo con la URL de descarga, como guardarla en la base de datos
+                val downloadUrl = uri.toString()
+                if(downloadUrl!=null){
+                    val hashmap : HashMap<String, Any> = HashMap()
+                    hashmap["image"] = downloadUrl
+                    val reference = FirebaseDatabase.getInstance().getReference("Users")
+                    reference.child(firebaseAuth.uid!!).updateChildren(hashmap).addOnSuccessListener {
+                        Toast.makeText(applicationContext, "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener{e->
+                        progressDialog.dismiss()
+                        // Muestra un mensaje de error al subir a la base de datos
+                        Toast.makeText(applicationContext, "Error uploading image to database: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }.addOnFailureListener { e ->
+            progressDialog.dismiss()
+            // Muestra un mensaje de error al subir a storage
+            Toast.makeText(applicationContext, "Error uploading image to storage: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val requestGalleryPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                dispatchPickImageIntent()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val requestCameraPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission_granted->
+            if (permission_granted){
+                dispatchTakePictureIntent()
+            }else{
+                Toast.makeText(applicationContext,"Permission has not been granted", Toast.LENGTH_SHORT).show()
+            }
+
+        }
 }

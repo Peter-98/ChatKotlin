@@ -67,9 +67,6 @@
             android:name=".chat.MessageActivity"
             android:exported="false" />
         <activity
-            android:name=".profile.EditImageProfileActivity"
-            android:exported="false" />
-        <activity
             android:name=".profile.ProfileActivity"
             android:exported="false" />
         <activity
