@@ -30,7 +30,7 @@
                 android:id="@+id/qrCode"
                 android:layout_width="50dp"
                 android:layout_height="45dp"
-                android:src="@drawable/ic_share_profile"
+                android:src="@drawable/ic_qr_login"
                 android:padding="8dp"
                 android:clickable="true"
                 app:tint="@android:color/white"

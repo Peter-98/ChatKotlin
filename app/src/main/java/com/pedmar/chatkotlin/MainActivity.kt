@@ -20,14 +20,15 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.pedmar.chatkotlin.fragments.ChatsFragment
 import com.pedmar.chatkotlin.fragments.UsersFragment
+import com.pedmar.chatkotlin.group.ActivityManager
 import com.pedmar.chatkotlin.model.Chat
 import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.profile.ProfileActivity
 
 class MainActivity : AppCompatActivity() {
 
-    var reference: DatabaseReference? = null //No es null
-    var firebaseUser: FirebaseUser? = null //No es null
+    private var reference: DatabaseReference? = null
+    private var firebaseUser: FirebaseUser? = null
     private lateinit var username: TextView
     private lateinit var qrCode: ImageView
 
@@ -36,15 +37,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initializeComponents()
         getData()
+        getSaveQrDataUser()
+    }
 
-        val intent = intent
-        val action = intent.action
-        val data = intent.data
+    private fun getSaveQrDataUser(){
+        intent = intent
+        var linkApp = intent.getStringExtra("linkApp").toString()
+        if(linkApp.isNotEmpty() && linkApp != "null"){
 
-        if (Intent.ACTION_VIEW == action && data != null) {
-            val qrData = data.lastPathSegment
-            // Aquí puedes procesar los datos del QR recibidos
-            Toast.makeText(this, "Datos del QR: $qrData", Toast.LENGTH_SHORT).show()
+            ActivityManager.setQrCodeActivity(QrCodeActivity())
+            ActivityManager.callSaveQrDataUser(linkApp)
         }
     }
 
@@ -63,37 +65,18 @@ class MainActivity : AppCompatActivity() {
         val viewPager: ViewPager = findViewById(R.id.ViewPagerMain)
         qrCode = findViewById(R.id.qrCode)
 
-        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+        //Inicializar adaptador
+        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
 
-                //Inicializar adaptador
-                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-                var countUnreadMessage = 0
-                for (dataSnapshot in snapshot.children) {
-                    val chat = dataSnapshot.getValue(Chat::class.java)
-                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && !chat.isViewed()) {
-                        countUnreadMessage += 1
-                    }
-                }
+        //Agregar los fragmentos al adaptador
+        viewPagerAdapter.addItem(ChatsFragment(), "Chats")
+        viewPagerAdapter.addItem(UsersFragment(), "Users")
 
-                //Agregar los fragmentos al adaptador
-                if (countUnreadMessage == 0) {
-                    viewPagerAdapter.addItem(ChatsFragment(), "Chats")
-                } else {
-                    viewPagerAdapter.addItem(ChatsFragment(), "[$countUnreadMessage] Chats")
-                }
-                viewPagerAdapter.addItem(UsersFragment(), "Users")
+        //Setear el adaptador al viewPager
+        viewPager.adapter = viewPagerAdapter
+        //Agregar las stats
+        tabLayout.setupWithViewPager(viewPager)
 
-                //Setear el adaptador al viewPager
-                viewPager.adapter = viewPagerAdapter
-                //Agregar las stats
-                tabLayout.setupWithViewPager(viewPager)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-            }
-        })
 
         qrCode.setOnClickListener {
             val intent = Intent(applicationContext, QrCodeActivity::class.java)

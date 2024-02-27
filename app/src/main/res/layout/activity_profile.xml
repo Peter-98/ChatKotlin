@@ -37,17 +37,17 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"/>
 
-            <!-- edit image profile -->
-            <ImageView
-                android:id="@+id/P_Edit_banner"
-                android:src="@drawable/ic_edit_banner"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentTop="true"
+            <CheckBox
+                android:id="@+id/P_private"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:text="@string/P_private"
+                android:layout_gravity="end"
+                android:layout_marginRight="8dp"
                 android:layout_alignParentEnd="true"
-                app:tint="@android:color/black"/>
+                android:layout_alignParentBottom="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
         </RelativeLayout>
 
@@ -169,7 +169,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -197,7 +197,7 @@
                 android:text="@string/Btn_save"
                 android:backgroundTint="#404249"
                 android:textColor="@color/white"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="60dp"
                 android:layout_gravity="center"
                 app:icon="@drawable/ic_save"
                 app:iconTint="@color/white"

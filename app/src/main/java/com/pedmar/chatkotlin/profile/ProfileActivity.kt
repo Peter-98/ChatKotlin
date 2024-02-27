@@ -8,11 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -33,13 +29,13 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var age : EditText
     private lateinit var phone : TextView
     private lateinit var btnSave : Button
-    private lateinit var editBanner : ImageView
     private lateinit var provider : TextView
     private lateinit var editPhone : ImageView
     private lateinit var btnVerify : MaterialButton
+    private lateinit var checkBoxPrivate: CheckBox
 
-    var user : FirebaseUser?= null
-    var reference : DatabaseReference?=null
+    private var user : FirebaseUser?= null
+    private var reference : DatabaseReference?=null
 
     private var phoneCode = ""
     private var phoneNumber = ""
@@ -174,10 +170,10 @@ class ProfileActivity : AppCompatActivity() {
         age = findViewById(R.id.P_age)
         phone = findViewById(R.id.P_phone)
         btnSave = findViewById(R.id.Btn_save)
-        editBanner = findViewById(R.id.P_Edit_banner)
         provider = findViewById(R.id.P_provider)
         editPhone = findViewById(R.id.edit_phone)
         btnVerify = findViewById(R.id.Btn_verify)
+        checkBoxPrivate = findViewById(R.id.P_private)
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Please wait")
         progressDialog.setCanceledOnTouchOutside(false)
@@ -201,6 +197,7 @@ class ProfileActivity : AppCompatActivity() {
                     age.setText(user!!.getAge())
                     phone.setText(user!!.getPhone())
                     provider.text = user!!.getProvider()
+                    checkBoxPrivate.isChecked = user!!.isPrivate()
                     Glide.with(applicationContext).load(user.getImage()).placeholder(R.drawable.ic_item_user).into(image)
                 }
             }
@@ -216,6 +213,7 @@ class ProfileActivity : AppCompatActivity() {
         hashmap["surnames"] = surnames.text.toString()
         hashmap["age"] = age.text.toString()
         hashmap["phone"] = phone.text.toString()
+        hashmap["private"] = checkBoxPrivate.isChecked
 
         reference!!.updateChildren(hashmap).addOnCompleteListener{task->
             if (task.isSuccessful){

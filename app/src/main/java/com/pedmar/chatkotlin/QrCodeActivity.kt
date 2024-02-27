@@ -1,13 +1,23 @@
 package com.pedmar.chatkotlin
 
+import android.Manifest
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -21,8 +31,9 @@ import com.google.zxing.common.BitMatrix
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.journeyapps.barcodescanner.BarcodeEncoder
-import com.pedmar.chatkotlin.adapter.CardAdapter
 import com.pedmar.chatkotlin.chat.MessageActivity
+import com.pedmar.chatkotlin.group.ActivityManager
+import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.model.QrData
 import com.pedmar.chatkotlin.model.User
 import java.security.MessageDigest
@@ -34,8 +45,7 @@ class QrCodeActivity : AppCompatActivity() {
     private lateinit var scanButton: Button
     private lateinit var qrCodeImageView: ImageView
     private lateinit var cardList: RecyclerView
-    private lateinit var cardAdapter: CardAdapter
-    private var scannedCards: MutableList<String> = mutableListOf()
+    private lateinit var urlQr: TextView
 
     private val qrCodeWidthPixels = 750
 
@@ -53,6 +63,9 @@ class QrCodeActivity : AppCompatActivity() {
         isShare()
         getData()
 
+        // Registrar esta actividad con el Singleton
+        ActivityManager.setQrCodeActivity(this)
+
         Glide.with(applicationContext).load(R.drawable.example_qr_code).into(qrCodeImageView)
 
         generateButton.setOnClickListener {
@@ -64,15 +77,23 @@ class QrCodeActivity : AppCompatActivity() {
 
             val uniqueUrl = generateUniqueUrlFromData(jsonData)
             println("URL única generada: $uniqueUrl")
-
-            scannedCards.clear()
-            scannedCards.add(uniqueUrl)
-            cardAdapter.notifyDataSetChanged()
+            urlQr.text = uniqueUrl
         }
 
         scanButton.setOnClickListener {
             startQRCodeScanner()
         }
+    }
+
+    fun copyTextToClipboard(view: View) {
+        val textView = view as TextView
+        val text = textView.text.toString()
+
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("Text", text)
+        clipboardManager.setPrimaryClip(clipData)
+
+        Toast.makeText(this, "Text copied to clipboard", Toast.LENGTH_SHORT).show()
     }
 
     private fun isShare() {
@@ -87,11 +108,7 @@ class QrCodeActivity : AppCompatActivity() {
         generateButton = findViewById(R.id.generateButton)
         scanButton = findViewById(R.id.scanButton)
         qrCodeImageView = findViewById(R.id.qrCodeImageView)
-        cardList = findViewById(R.id.cardList)
-
-        cardAdapter = CardAdapter(scannedCards)
-        cardList.layoutManager = LinearLayoutManager(this)
-        cardList.adapter = cardAdapter
+        urlQr = findViewById(R.id.urlQr)
     }
 
     private fun getData() {
@@ -235,6 +252,24 @@ class QrCodeActivity : AppCompatActivity() {
         return "miapp://${userData.getUsername()}/${hexString.toString()}"
     }
 
+    fun getQrDataFromUniqueUrl(url: String) {
+
+        if (!url.startsWith("miapp://")) {
+            val dataString = url.substring("miapp://".length)
+            val parts = dataString.split("/")
+
+            if (parts.size >= 2) {
+                val hexHash = parts.last()
+                val bytes = ByteArray(hexHash.length / 2)
+                for (i in 0 until hexHash.length step 2) {
+                    bytes[i / 2] = hexHash.substring(i, i + 2).toInt(16).toByte()
+                }
+                saveQrDataUser(String(bytes))
+            }
+        }
+    }
+
+
     private fun startQRCodeScanner() {
         val integrator = IntentIntegrator(this)
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
@@ -247,7 +282,6 @@ class QrCodeActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result: IntentResult =
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-
         if (result != null) {
             if (result.contents != null) {
                 saveQrDataUser(result.contents)
@@ -257,6 +291,7 @@ class QrCodeActivity : AppCompatActivity() {
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
+
     }
 
     private fun updateStatus(status: String) {

@@ -142,10 +142,11 @@ class MessageGroupActivity : AppCompatActivity(){
         infoMessage["url"] = ""
         infoMessage["viewed"] = false
         infoMessage["groupChat"] = true
+        infoMessage["image"] = currentUser!!.getImage()
 
         val isViewedList = MutableList(userList!!.size) { false }
         isViewedList[userList!!.indexOf(currentUser!!.getUid())] = true
-        infoMessage["isAllViewed"] = isViewedList
+        infoMessage["allViewed"] = isViewedList
 
         reference.child("Chats").child(keyMessage!!).setValue(infoMessage).addOnCompleteListener{task->
             if (task.isSuccessful){
@@ -286,7 +287,7 @@ class MessageGroupActivity : AppCompatActivity(){
                         viewedList[indexUser] = true
 
                         val hashMap = HashMap<String, Any>()
-                        hashMap["isAllViewed"] = viewedList
+                        hashMap["allViewed"] = viewedList
 
                         if(viewedList.all { it }){
                             hashMap["viewed"] = true
@@ -371,7 +372,7 @@ class MessageGroupActivity : AppCompatActivity(){
         val items = arrayOf("Take Photo", "Choose from Gallery", "Select document", "Send location")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("Select Image")
+        //builder.setTitle("Select Image")
         builder.setItems(items) { dialog, which ->
             when (which) {
                 0 -> dispatchTakePictureIntent()
@@ -510,6 +511,7 @@ class MessageGroupActivity : AppCompatActivity(){
                 infoMessageImage["url"] = url
                 infoMessageImage["viewed"] = false
                 infoMessageImage["groupChat"] = true
+                infoMessageImage["image"] = currentUser!!.getImage()
 
                 if(documentUri != null){
                     infoMessageImage["message"] = "File: ${getFileNameFromUri(documentUri)}"
@@ -519,7 +521,7 @@ class MessageGroupActivity : AppCompatActivity(){
 
                 val isViewedList = MutableList(userList!!.size) { false }
                 isViewedList[userList!!.indexOf(currentUser!!.getUid())] = true
-                infoMessageImage["isAllViewed"] = isViewedList
+                infoMessageImage["allViewed"] = isViewedList
 
                 reference.child("Chats").child(keyMessage!!).setValue(infoMessageImage)
                     .addOnCompleteListener { task->

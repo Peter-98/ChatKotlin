@@ -10,6 +10,7 @@ class Chat {
     private var viewed = false
     private var groupChat = false
     private var allViewed: List<Boolean> = emptyList()
+    private var image : String = ""
 
     constructor()
 
@@ -23,6 +24,7 @@ class Chat {
         viewed: Boolean,
         groupChat: Boolean,
         allViewed: List<Boolean>,
+        image: String
     ) {
         this.keyMessage = keyMessage
         this.issuer = issuer
@@ -33,6 +35,7 @@ class Chat {
         this.viewed = viewed
         this.groupChat = groupChat
         this.allViewed = allViewed
+        this.image = image
     }
 
     //getters y setters
@@ -100,11 +103,19 @@ class Chat {
         this.groupChat = groupChat!!
     }
 
-    fun getAllViewed() :  List<Boolean>?{
+    fun getAllViewed() : List<Boolean>?{
         return allViewed
     }
 
-    fun setAllViewed(allViewed :  List<Boolean>?){
+    fun setAllViewed(allViewed : List<Boolean>?){
         this.allViewed = allViewed!!
+    }
+
+    fun getImage() : String{
+        return image
+    }
+
+    fun setImage(image : String){
+        this.image = image!!
     }
 }

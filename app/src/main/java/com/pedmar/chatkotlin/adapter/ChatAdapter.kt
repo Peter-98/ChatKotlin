@@ -1,36 +1,26 @@
 package com.pedmar.chatkotlin.adapter
 
-import android.Manifest
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.*
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.*
 import android.widget.RelativeLayout.LayoutParams
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import com.pedmar.chatkotlin.MainActivity
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.chat.DownloadFilesActivity
-import com.pedmar.chatkotlin.group.ActivityManager
-import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.model.Chat
-import com.pedmar.chatkotlin.profile.VisitedProfileActivity
-import java.io.File
 
 class ChatAdapter(
     context: Context,
@@ -56,16 +46,16 @@ class ChatAdapter(
     inner class ViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView){
         var imageProfileChat : ImageView?= null
         var seeMessage : TextView?= null
-        var sendedLeftImage : ImageView?= null
-        var sendedRightImage : ImageView?= null
+        var sentLeftImage : ImageView?= null
+        var sentRightImage : ImageView?= null
         var seenMessage : TextView?= null
         var userName : TextView?= null
 
         init{
             imageProfileChat = itemView.findViewById(R.id.imageProfileChat)
             seeMessage = itemView.findViewById(R.id.seeMessage)
-            sendedLeftImage = itemView.findViewById(R.id.sendedLeftImage)
-            sendedRightImage = itemView.findViewById(R.id.sendedRightImage)
+            sentLeftImage = itemView.findViewById(R.id.sendedLeftImage)
+            sentRightImage = itemView.findViewById(R.id.sendedRightImage)
             seenMessage = itemView.findViewById(R.id.seenMessage)
             userName = itemView.findViewById(R.id.userName)
         }
@@ -88,13 +78,13 @@ class ChatAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
        val chat : Chat = chatList[position]
-        Glide.with(context).load(imageUrl).placeholder(R.drawable.ic_image_chat).into(holder.imageProfileChat!!)
-
         // Obtener el color del usuario desde el mapa de colores
         val userColor = userColorsMap?.get(chat.getIssuer())
+
         // Si el mensaje es de un grupo y se encuentra en el mapa de colores, asignar el color al fondo del mensaje
         if (userColor != null && chat.isGroupChat() && !chat.getIssuer().equals(firebaseUser.uid)) {
 
+            Glide.with(context).load(chat.getImage()).placeholder(R.drawable.ic_image_chat).into(holder.imageProfileChat!!)
 
             val messageLayout = holder.itemView.findViewById<LinearLayout>(R.id.messageLayout)
 
@@ -106,6 +96,16 @@ class ChatAdapter(
             holder.userName!!.visibility = View.VISIBLE
         }else{
             holder.userName!!.visibility = View.GONE
+            Glide.with(context).load(imageUrl).placeholder(R.drawable.ic_image_chat).into(holder.imageProfileChat!!)
+        }
+
+        //Copiar mensaje al mantener pulsado
+        holder.seeMessage!!.setOnLongClickListener {
+            val clipboardManager = it.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Text", chat.getMessage())
+            clipboardManager.setPrimaryClip(clip)
+            Toast.makeText(it.context, "Text copied to clipboard", Toast.LENGTH_SHORT).show()
+            true
         }
 
         /* Si el mensaje contiene image*/
@@ -114,10 +114,10 @@ class ChatAdapter(
             /* Usuario envia una imagen como mensaje*/
             if(chat.getIssuer().equals(firebaseUser!!.uid)){
                 holder.seeMessage!!.visibility = View.GONE
-                holder.sendedRightImage!!.visibility = View.VISIBLE
-                Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedRightImage!!)
+                holder.sentRightImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sentRightImage!!)
 
-                holder.sendedRightImage!!.setOnClickListener{
+                holder.sentRightImage!!.setOnClickListener{
                     val options = arrayOf<CharSequence>("View image","Delete image")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
@@ -136,10 +136,10 @@ class ChatAdapter(
             /* Usuario nos envia una imagen como mensaje*/
             else if(!chat.getIssuer().equals(firebaseUser!!.uid)){
                 holder.seeMessage!!.visibility = View.GONE
-                holder.sendedLeftImage!!.visibility = View.VISIBLE
-                Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sendedLeftImage!!)
+                holder.sentLeftImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(chat.getUrl()).placeholder(R.drawable.ic_send_image).into(holder.sentLeftImage!!)
 
-                holder.sendedLeftImage!!.setOnClickListener{
+                holder.sentLeftImage!!.setOnClickListener{
                     val options = arrayOf<CharSequence>("View image")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
@@ -157,10 +157,10 @@ class ChatAdapter(
             /* Usuario envia un archivo como mensaje*/
             if(chat.getIssuer().equals(firebaseUser!!.uid)) {
                 holder.seeMessage!!.text = chat.getMessage()
-                holder.sendedRightImage!!.visibility = View.VISIBLE
-                Glide.with(context).load(R.drawable.ic_file).into(holder.sendedRightImage!!)
+                holder.sentRightImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(R.drawable.ic_file).into(holder.sentRightImage!!)
 
-                holder.sendedRightImage!!.setOnClickListener{
+                holder.sentRightImage!!.setOnClickListener{
                     val options = arrayOf<CharSequence>("Download file","Delete file")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
@@ -180,10 +180,10 @@ class ChatAdapter(
             /* Usuario nos envia un arhicvo como mensaje*/
             }else if(!chat.getIssuer().equals(firebaseUser!!.uid)){
                 holder.seeMessage!!.text = chat.getMessage()
-                holder.sendedLeftImage!!.visibility = View.VISIBLE
-                Glide.with(context).load(R.drawable.ic_file).into(holder.sendedLeftImage!!)
+                holder.sentLeftImage!!.visibility = View.VISIBLE
+                Glide.with(context).load(R.drawable.ic_file).into(holder.sentLeftImage!!)
 
-                holder.sendedLeftImage!!.setOnClickListener{
+                holder.sentLeftImage!!.setOnClickListener{
                     val options = arrayOf<CharSequence>("Download file")
                     val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
                     //builder.setTitle("")
@@ -215,6 +215,19 @@ class ChatAdapter(
                             deleteMessage(position, holder)
                         }
                     })
+                    builder.show()
+                }
+            }
+
+            // Verificar si el mensaje contiene un enlace
+            if (isHyperlink(chat.getMessage()!!) || isCustomAppLink(chat.getMessage()!!)) {
+                holder.seeMessage!!.setOnClickListener {
+                    val context = holder.itemView.context
+                    val options = arrayOf<CharSequence>("Open link with app")
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                    builder.setItems(options) { dialogInterface, _ ->
+                        openLinkInApp(context, chat.getMessage()!!)
+                    }
                     builder.show()
                 }
             }
@@ -281,6 +294,38 @@ class ChatAdapter(
                     Toast.makeText(holder.itemView.context, "The message has not been deleted", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun isHyperlink(message: String): Boolean {
+        val regex = Regex("(http(s)?://[\\w-]+(\\.[\\w-]+)+(/[\\w- ./?%&=]*)?)")
+        return regex.find(message) != null
+    }
+
+    private fun isCustomAppLink(message: String): Boolean {
+        val customAppLinkRegex = Regex("miapp://[\\w-]+(/[\\w-]+)+")
+        return customAppLinkRegex.matches(message)
+    }
+
+    private fun openLinkInApp(context: Context, link: String) {
+
+        if(isCustomAppLink(link)){
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra("linkApp", link)
+            context.startActivity(intent)
+        }else{
+            if (URLUtil.isValidUrl(link)) {
+
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                } else {
+                    Toast.makeText(context, "No application found to handle the URL", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, "Invalid URL", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }

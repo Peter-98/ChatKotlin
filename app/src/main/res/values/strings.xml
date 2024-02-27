@@ -37,7 +37,8 @@
 
     <string name="Item_username">Username</string>
     <string name="Item_user_email">User email</string>
-    <string name="Item_last_message"></string>
+    <string name="Item_last_message">Last message</string>
+    <string name="Item_not_seen_messages">12</string>
 
     <string name="Et_search_user">Search user</string>
     <string name="Et_group_name"> Enter the group name </string>
@@ -51,6 +52,7 @@
     <string name="P_surnames">Surnames</string>
     <string name="P_provider_txt">Provider : </string>
     <string name="P_provider"> -- </string>
+    <string name="P_private">Private profile</string>
     <string name="Btn_save">Save</string>
 
     <string name="Btn_verify">Not verified</string>
