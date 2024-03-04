@@ -62,8 +62,7 @@ class ChatsFragment : Fragment() {
                             (userListChats as ArrayList).add(chatList)
                     }
                 }
-                val context = requireContext()
-                getChatList(context)
+                getChatList()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -93,7 +92,7 @@ class ChatsFragment : Fragment() {
         reference.child(firebaseUser!!.uid).setValue(token1)
     }
 
-    private fun getChatList(context: Context?) {
+    private fun getChatList() {
         userList = ArrayList()
         usersGroupList = ArrayList()
 
@@ -114,7 +113,7 @@ class ChatsFragment : Fragment() {
                         }
                     }
                 }
-                updateAdapter(context)
+                updateAdapter()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -138,7 +137,7 @@ class ChatsFragment : Fragment() {
                         }
                     }
                 }
-                updateAdapter(context)
+                updateAdapter()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -150,15 +149,19 @@ class ChatsFragment : Fragment() {
         referenceUsers.addValueEventListener(valueEventListenerUsers)
         referenceGroups.addValueEventListener(valueEventListenerGroups)
     }
-
-    // Método para actualizar el adaptador después de obtener los datos de usuarios y grupos
-    private fun updateAdapter(context: Context?) {
-        // Verificar que al menos una de las dos listas no sea nula y no esté vacía
-        if ((userList != null && userList!!.isNotEmpty()) || (usersGroupList != null && usersGroupList!!.isNotEmpty())) {
-            userAdapter = UserAdapter(requireContext(), userList ?: emptyList(), true, false, false,usersGroupList ?: emptyList())
-            rvChatsList.adapter = userAdapter
+    private fun updateAdapter() {
+        // Verificar si el fragmento está adjunto a una actividad y tiene un contexto válido
+        if (isAdded) {
+            val context = requireContext() // Obtener el contexto del fragmento
+            // Verificar que al menos una de las dos listas no sea nula y no esté vacía
+            if ((userList != null && userList!!.isNotEmpty()) || (usersGroupList != null && usersGroupList!!.isNotEmpty())) {
+                // Crear el adaptador utilizando el contexto del fragmento
+                userAdapter = UserAdapter(context, userList ?: emptyList(), true, false, false,usersGroupList ?: emptyList())
+                rvChatsList.adapter = userAdapter
+            }
         }
     }
+
 
 
 

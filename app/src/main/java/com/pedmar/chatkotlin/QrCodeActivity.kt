@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -16,6 +17,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
@@ -33,25 +36,23 @@ import com.google.zxing.integration.android.IntentResult
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.pedmar.chatkotlin.chat.MessageActivity
 import com.pedmar.chatkotlin.group.ActivityManager
-import com.pedmar.chatkotlin.group.SelectDataGroup
-import com.pedmar.chatkotlin.model.QrData
 import com.pedmar.chatkotlin.model.User
 import java.security.MessageDigest
 import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 class QrCodeActivity : AppCompatActivity() {
 
     private lateinit var generateButton: Button
     private lateinit var scanButton: Button
     private lateinit var qrCodeImageView: ImageView
-    private lateinit var cardList: RecyclerView
     private lateinit var urlQr: TextView
 
     private val qrCodeWidthPixels = 750
 
     private lateinit var userData: User
-    private var share: Boolean = true
-    private lateinit var jsonData: String
 
     private var reference: DatabaseReference? = null
     private var firebaseUser: FirebaseUser? = null
@@ -60,7 +61,6 @@ class QrCodeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_code)
         initializeVariables()
-        isShare()
         getData()
 
         // Registrar esta actividad con el Singleton
@@ -75,9 +75,9 @@ class QrCodeActivity : AppCompatActivity() {
             val qrCodeBitmap = generateQRCode(userData.getUid()!!)
             qrCodeImageView.setImageBitmap(qrCodeBitmap)
 
-            val uniqueUrl = generateUniqueUrlFromData(jsonData)
-            println("URL única generada: $uniqueUrl")
-            urlQr.text = uniqueUrl
+            //val uniqueUrl = generateUniqueUrlFromData(jsonData)
+            //println("URL única generada: $uniqueUrl")
+            //urlQr.text = uniqueUrl
         }
 
         scanButton.setOnClickListener {
@@ -94,11 +94,6 @@ class QrCodeActivity : AppCompatActivity() {
         clipboardManager.setPrimaryClip(clipData)
 
         Toast.makeText(this, "Text copied to clipboard", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun isShare() {
-        intent = intent
-        share = intent.getBooleanExtra("share", true)
     }
 
     private fun initializeVariables() {
@@ -127,29 +122,13 @@ class QrCodeActivity : AppCompatActivity() {
 
     private fun generateQRCode(userDataUid: String): Bitmap? {
 
-        var qrDataDatabase = parseJsonToQrData(userData.getQrMark()!!)
-        if (qrDataDatabase == null) {
-            qrDataDatabase = QrData("", "")
-        }
-
-        val qrData: QrData = if (share) {
-            QrData("${userDataUid}_${System.currentTimeMillis()}", qrDataDatabase!!.getQrLogin())
-        } else {
-            QrData(
-                qrDataDatabase!!.getQrDataShare(),
-                "${userDataUid}_${System.currentTimeMillis()}"
-            )
-        }
-
-        val gson = Gson()
-        jsonData = gson.toJson(qrData)
-
+        var qrDataShare = "${userDataUid}_${System.currentTimeMillis()}"
 
         val bitMatrix: BitMatrix = try {
             val hints = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
             hints[EncodeHintType.CHARACTER_SET] = "UTF-8"
             MultiFormatWriter().encode(
-                jsonData,
+                qrDataShare,
                 BarcodeFormat.QR_CODE,
                 qrCodeWidthPixels,
                 qrCodeWidthPixels,
@@ -163,7 +142,7 @@ class QrCodeActivity : AppCompatActivity() {
         val barcodeEncoder = BarcodeEncoder()
         val bitmap = barcodeEncoder.createBitmap(bitMatrix)
 
-        saveQrMark(jsonData)
+        saveQrMark(qrDataShare)
         return bitmap
     }
 
@@ -173,7 +152,7 @@ class QrCodeActivity : AppCompatActivity() {
                 val user = dataSnapshot.getValue(User::class.java)
                 if (user != null) {
                     val hashMap = HashMap<String, Any>()
-                    hashMap["qrMark"] = data
+                    hashMap["qrDataShare"] = data
                     dataSnapshot.ref.updateChildren(hashMap)
                 }
             }
@@ -183,15 +162,13 @@ class QrCodeActivity : AppCompatActivity() {
         })
     }
 
-    private fun saveQrDataUser(data: String){
-        val gson = Gson()
-        val qrData: QrData = gson.fromJson(data, QrData::class.java)
+    private fun saveQrDataUser(qrDataShare: String){
 
         reference!!.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val userPrimary = dataSnapshot.getValue(User::class.java)
                 val userReference = FirebaseDatabase.getInstance().reference.child("Users").child(
-                    qrData.getQrDataShare()!!.split("_")[0]
+                    qrDataShare.split("_")[0]
                 )
                 userReference.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(userSnapshot: DataSnapshot) {
@@ -199,17 +176,17 @@ class QrCodeActivity : AppCompatActivity() {
 
                         if (userPrimary != null && userSecondary != null &&
                             !userPrimary.getKnownPrivateUsers().contains(userSecondary.getUid())
-                            && qrData.getQrDataShare() == parseJsonToQrData(userSecondary.getQrMark()!!)!!.getQrDataShare()
+                            && qrDataShare == userSecondary.getQrDataShare()!!
                         ) {
                             val hashMap = HashMap<String, Any>()
                             hashMap["knownPrivateUsers"] =
-                                userPrimary.getKnownPrivateUsers() + qrData.getQrDataShare()!!
+                                userPrimary.getKnownPrivateUsers() + qrDataShare
                                     .split("_")[0]
                             dataSnapshot.ref.updateChildren(hashMap)
 
                             Toast.makeText(applicationContext, "User ${userSecondary.getUsername()} added", Toast.LENGTH_SHORT).show()
                             val intent = Intent(this@QrCodeActivity, MessageActivity::class.java)
-                            intent.putExtra("userUid", qrData.getQrDataShare()!!.split("_")[0])
+                            intent.putExtra("userUid", qrDataShare!!.split("_")[0])
                             this@QrCodeActivity.startActivity(intent)
                         }else{
                             Toast.makeText(applicationContext, "Previously added user", Toast.LENGTH_SHORT).show()
@@ -224,16 +201,6 @@ class QrCodeActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
             }
         })
-    }
-
-    private fun parseJsonToQrData(jsonData: String): QrData? {
-        val gson = Gson()
-        return try {
-            gson.fromJson(jsonData, QrData::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
     }
 
     private fun generateUniqueUrlFromData(qrData: String): String {
@@ -279,12 +246,18 @@ class QrCodeActivity : AppCompatActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result: IntentResult =
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            if (result.contents != null) {
-                saveQrDataUser(result.contents)
+            if (result.contents != null) {{}
+                if(result.contents.contains("login: ")){
+                    loginWithQr(result.contents.split("login: ")[1])
+                }else{
+                    saveQrDataUser(result.contents)
+                }
+
             } else {
                 Toast.makeText(this, "Scan Cancelled", Toast.LENGTH_SHORT).show()
             }
@@ -292,6 +265,37 @@ class QrCodeActivity : AppCompatActivity() {
             super.onActivityResult(requestCode, resultCode, data)
         }
 
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loginWithQr(deviceIdEncrypted: String) {
+
+        val decodeDeviceId = decrypt(
+            "AES/CBC/PKCS5Padding",
+            deviceIdEncrypted,
+            SecretKeySpec(loadSecretKey().toByteArray(), "AES"),
+            IvParameterSpec(ByteArray(16)))
+
+        val reference =
+            FirebaseDatabase.getInstance().reference.child("UsersDevice").child(decodeDeviceId)
+
+        val hashMap = HashMap<String, Any>()
+        hashMap["idDevice"] = decodeDeviceId
+        hashMap["uid"] = firebaseUser!!.uid
+        hashMap["enable"] = true
+        reference!!.updateChildren(hashMap)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun decrypt(
+        algorithm: String,
+        cipherText: String,
+        key: SecretKeySpec,
+        iv: IvParameterSpec
+    ): String {
+        val cipher = Cipher.getInstance(algorithm)
+        cipher.init(Cipher.DECRYPT_MODE, key, iv)
+        val plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText))
+        return String(plainText)
     }
 
     private fun updateStatus(status: String) {
@@ -310,6 +314,14 @@ class QrCodeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         updateStatus("offline")
+    }
+
+    private fun loadSecretKey(): String {
+        val properties = Properties()
+        val assetManager = applicationContext.assets
+        val inputStream = assetManager.open("configs/config.properties")
+        properties.load(inputStream)
+        return properties.getProperty("secretKey")
     }
 
 

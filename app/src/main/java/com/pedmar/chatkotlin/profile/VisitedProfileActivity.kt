@@ -25,7 +25,6 @@ class VisitedProfileActivity : AppCompatActivity() {
 
     private lateinit var pvUsername : TextView
     private lateinit var pvEmail :TextView
-    private lateinit var pvUid : TextView
     private lateinit var pvNames  :TextView
     private lateinit var pvSurnames : TextView
     private lateinit var pvPhone : TextView
@@ -121,7 +120,6 @@ class VisitedProfileActivity : AppCompatActivity() {
 
         pvUsername = findViewById(R.id.PV_username)
         pvEmail = findViewById(R.id.PV_email)
-        pvUid = findViewById(R.id.PV_uid)
         pvNames = findViewById(R.id.PV_name)
         pvSurnames = findViewById(R.id.PV_surnames)
         pvPhone = findViewById(R.id.PV_phone)
@@ -140,10 +138,9 @@ class VisitedProfileActivity : AppCompatActivity() {
         reference.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val user : User? = snapshot.getValue(User::class.java)
-                //obtener informacion en tiempo real
+
                 pvUsername.text = user!!.getUsername()
                 pvEmail.text = user.getEmail()
-                pvUid.text = user.getUid()
                 pvNames.text = user.getName()
                 pvSurnames.text = user.getSurnames()
                 pvAge.text = user.getAge()

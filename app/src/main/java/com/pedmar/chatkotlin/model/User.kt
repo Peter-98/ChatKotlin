@@ -15,7 +15,7 @@ class User {
     private var provider : String = ""
     private var private : Boolean = true
     private var knownPrivateUsers : List<String> = emptyList()
-    private var qrMark : String = ""
+    private var qrDataShare : String = ""
 
     constructor()
 
@@ -33,7 +33,7 @@ class User {
         provider: String,
         private: Boolean,
         knownPrivateUsers: List<String>,
-        qrMark : String
+        qrDataShare : String
     ) {
         this.uid = uid
         this.username = username
@@ -48,7 +48,7 @@ class User {
         this.provider = provider
         this.private = private
         this.knownPrivateUsers = knownPrivateUsers
-        this.qrMark = qrMark
+        this.qrDataShare = qrDataShare
     }
 
     //getters y setters
@@ -156,12 +156,12 @@ class User {
         this.knownPrivateUsers = knownPrivateUsers
     }
 
-    fun getQrMark() : String?{
-        return qrMark
+    fun getQrDataShare() : String?{
+        return qrDataShare
     }
 
-    fun setQrMark(qrMark : String){
-        this.qrMark = qrMark
+    fun setQrDataShare(qrDataShare : String){
+        this.qrDataShare = qrDataShare
     }
 
 }

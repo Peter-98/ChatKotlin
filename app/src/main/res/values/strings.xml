@@ -3,8 +3,10 @@
     <string name="nombre_desarrollador">Pedro Martin Aguilera</string>
 
     <!--- boton inicial -->
-    <string name="Btn_ir_login">Log in with email</string>
+    <string name="Btn_ir_login">Log in</string>
     <string name="Btn_ir_login_google">Log in with Google</string>
+    <string name="Btn_sign_up">Sign up</string>
+    <string name="login">Log in to AlmeriTalk</string>
 
 
     <!--- registro edit text -->
@@ -31,6 +33,7 @@
     <string name="L_instructions">Enter your email to reset your password</string>ç
     <string name="Btn_send_email">Send</string>
     <string name="L_Et_group_name">Enter group name</string>
+    <string name="Btn_login_google">Continue with google</string>
 
 
     <string name="username">Username</string>

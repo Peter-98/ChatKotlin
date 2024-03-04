@@ -18,15 +18,13 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Btn_ir_login"
             android:text="@string/Btn_ir_login"
-            app:icon="@drawable/ic_register_email"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             style="@style/DiscordButton"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Btn_ir_login_google"
-            android:text="@string/Btn_ir_login_google"
-            app:icon="@drawable/login_google"
+            android:id="@+id/Btn_sign_up"
+            android:text="@string/Btn_sign_up"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             style="@style/DiscordButton"/>

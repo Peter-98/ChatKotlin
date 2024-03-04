@@ -8,4 +8,14 @@
         <item name="iconEndPadding">8dp</item>
         <item name="iconSize">24dp</item>
     </style>
+
+    <style name="TextInputLayoutCustomStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+
+        <item name="android:textColor">@android:color/white</item>    <!-- Color cuando el texto del hint está desactivado -->
+        <item name="android:textColorHint">@android:color/white</item> <!-- Color cuando el texto del hint está activado -->
+        <item name="hintTextColor">@android:color/white</item> <!-- Color del texto de hint -->
+
+    </style>
+
 </resources>
