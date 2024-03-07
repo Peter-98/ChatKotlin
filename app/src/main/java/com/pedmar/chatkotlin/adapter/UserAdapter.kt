@@ -38,11 +38,11 @@ class UserAdapter(
 ) : RecyclerView.Adapter<UserAdapter.ViewHolder?>() {
 
     private val context: Context
-    private val usersList: List<User>
+    private var usersList: List<User>
     private val viewedChat: Boolean
     private val createGroup: Boolean
     private val groupMembers: Boolean
-    private val groupList: List<GroupChat>
+    private var groupList: List<GroupChat>
     private var lastMessage: String = ""
     private var countUnreadMessage: Int = 0
     private var countUnreadMessageGroup: Int = 0
@@ -116,7 +116,6 @@ class UserAdapter(
             holder.itemView!!.setOnLongClickListener {
                 val options = arrayOf<CharSequence>("Delete chat")
                 val builder: AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
-                //builder.setTitle("")
                 builder.setItems(
                     options,
                     DialogInterface.OnClickListener { dialogInterface, i ->
@@ -127,8 +126,6 @@ class UserAdapter(
                 builder.show()
                 true
             }
-
-
 
             holder.itemView.setOnClickListener {
                 if (createGroup) {
@@ -141,7 +138,7 @@ class UserAdapter(
                     }
 
                     // Mostrar el botón  si hay dos o más elementos
-                    if (selectedUsers.size >= 2 && addGroupButton != null) {
+                    if (selectedUsers.size >= 1 && addGroupButton != null) {
                         addGroupButton!!.visibility = View.VISIBLE
                     } else {
                         addGroupButton?.visibility = View.GONE
@@ -179,7 +176,7 @@ class UserAdapter(
             }
 
             addGroupButton?.setOnClickListener {
-                if (selectedUsers.size >= 2) {
+                if (selectedUsers.size >= 1) {
                     var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
                     selectedUsers.add(firebaseUser!!.uid)
                     selectedUsers.sorted()
@@ -403,8 +400,10 @@ class UserAdapter(
                 override fun onCancelled(error: DatabaseError) {
                 }
             })
+
+            // Eliminar un elemento de una lista inmutable
+            usersList = usersList.filter { it != user }
         }else{
-            var emptyGroup = false
 
             //Elimina tu uid del grupo
             FirebaseDatabase.getInstance().reference.child("MessageList").child(uidReference!!)
@@ -435,50 +434,48 @@ class UserAdapter(
                         referenceGroup.child("uidUsersList").setValue(uidUsersMutable)
                         referenceGroup.child("colorUsersList").setValue(uidColorsUsersMutable)
 
+                        //Elimina el grupo si esta vacio
                         if(uidUsersMutable.isEmpty()){
-                            emptyGroup= true
+                            //Elimina los mensajes de chats del grupo
+                            reference.addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    for (dataSnapshot in snapshot.children) {
+                                        val chat: Chat? = dataSnapshot.getValue(Chat::class.java)
+                                        if (firebaseUser != null && chat != null) {
+                                            if (chat!!.getReceiver()
+                                                    .equals(uidReference)
+                                            ) {
+                                                deleteMessage(chat)
+                                            }
+                                        }
+                                    }
+                                }
+                                override fun onCancelled(error: DatabaseError) {
+                                }
+                            })
+
+                            //Elimina el grupo
+                            FirebaseDatabase.getInstance().reference.child("Groups")
+                                .child(uidReference!!).removeValue().addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        logger.info("Grupo $uidReference eliminado exitosamente.")
+                                    }
+                                }.addOnFailureListener { exception ->
+                                    logger.info("Error al intentar eliminar el grupo $uidReference de la base de datos:  $exception")
+                                }
                         }
-
                     }
-
                 }
                 override fun onCancelled(error: DatabaseError) {
                 }
             })
 
-            //Elimina el grupo si esta vacio
-            if(emptyGroup){
-
-                //Elimina los mensajes de chats del grupo
-                reference.addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        for (dataSnapshot in snapshot.children) {
-                            val chat: Chat? = dataSnapshot.getValue(Chat::class.java)
-                            if (firebaseUser != null && chat != null) {
-                                if (chat!!.getReceiver()
-                                        .equals(uidReference)
-                                ) {
-                                    deleteMessage(chat)
-                                }
-                            }
-                        }
-                    }
-                    override fun onCancelled(error: DatabaseError) {
-                    }
-                })
-
-                //Elimina el grupo
-                FirebaseDatabase.getInstance().reference.child("Groups")
-                    .child(uidReference!!).removeValue().addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            emptyGroup = false
-                            logger.info("Grupo $uidReference eliminado exitosamente.")
-                        }
-                    }.addOnFailureListener { exception ->
-                        logger.info("Error al intentar eliminar el grupo $uidReference de la base de datos:  $exception")
-                    }
-            }
+            // Eliminar un elemento de una lista inmutable
+            groupList = groupList.filter { it != groupChat }
         }
+
+        // Notificar al adaptador sobre el cambio en los datos
+        notifyDataSetChanged()
     }
 
     private fun deleteMessage(chat: Chat) {

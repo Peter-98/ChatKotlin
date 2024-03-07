@@ -247,20 +247,19 @@ class MessageGroupActivity : AppCompatActivity(){
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val groupChat : GroupChat? = snapshot.getValue(GroupChat::class.java)
-                userList = groupChat!!.getUidUsersList()
+                if(groupChat != null){
+                    userList = groupChat!!.getUidUsersList()
 
-                nameGroupChat.text = groupChat!!.getName()
-                //Obtener imagen de perfil
-                if(groupChat.getImage().toString().equals("No image")){
-                    Glide.with(applicationContext).load(R.drawable.ic_item_user).placeholder(R.drawable.ic_item_user).into(imageGroupChat)
-                }else{
-                    Glide.with(applicationContext).load(groupChat.getImage()).placeholder(R.drawable.ic_item_user).into(imageGroupChat)
+                    nameGroupChat.text = groupChat!!.getName()
+                    //Obtener imagen de perfil
+                    if(groupChat.getImage().toString().equals("No image")){
+                        Glide.with(applicationContext).load(R.drawable.ic_item_user).placeholder(R.drawable.ic_item_user).into(imageGroupChat)
+                    }else{
+                        Glide.with(applicationContext).load(groupChat.getImage()).placeholder(R.drawable.ic_item_user).into(imageGroupChat)
+                    }
+                    getMessages(firebaseUser!!.uid, uidGroup.toString(), groupChat.getImage())
                 }
-
-
-                getMessages(firebaseUser!!.uid, uidGroup.toString(), groupChat.getImage())
             }
-
             override fun onCancelled(error: DatabaseError) {
             }
 

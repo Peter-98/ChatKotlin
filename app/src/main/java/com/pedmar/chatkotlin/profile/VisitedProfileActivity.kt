@@ -18,6 +18,7 @@ import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.pedmar.chatkotlin.MainActivity
 import com.pedmar.chatkotlin.R
 import com.pedmar.chatkotlin.model.User
 
@@ -58,7 +59,7 @@ class VisitedProfileActivity : AppCompatActivity() {
     private fun getImage() {
         val reference = FirebaseDatabase.getInstance().reference.child("Users").child(visitedUidUser)
 
-        reference.addValueEventListener(object : ValueEventListener{
+        reference.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val user : User?= snapshot.getValue(User::class.java)
                 val image = user!!.getImage()
@@ -71,23 +72,27 @@ class VisitedProfileActivity : AppCompatActivity() {
     }
 
     private fun displayImage(image: String?) {
-        val imgView : PhotoView
-        val btnCloseV : Button
-        val dialog = Dialog(this@VisitedProfileActivity)
+        if (!image.isNullOrEmpty()) { // Verificar si la URL de la imagen no es nula ni vacía
+            val imgView: PhotoView
+            val btnCloseV: Button
+            val dialog = Dialog(this@VisitedProfileActivity)
 
-        dialog.setContentView(R.layout.dialog_view_image)
+            dialog.setContentView(R.layout.dialog_view_image)
 
-        imgView = dialog.findViewById(R.id.imgView)
-        btnCloseV = dialog.findViewById(R.id.Btn_close_w)
+            imgView = dialog.findViewById(R.id.imgView)
+            btnCloseV = dialog.findViewById(R.id.Btn_close_w)
 
-        Glide.with(applicationContext).load(image).placeholder(R.drawable.ic_send_image).into(imgView)
+            Glide.with(applicationContext).load(image).placeholder(R.drawable.ic_send_image).into(imgView)
 
-        btnCloseV.setOnClickListener{
-            dialog.dismiss()
+            btnCloseV.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
+            dialog.setCanceledOnTouchOutside(false)
+        } else {
+            Toast.makeText(applicationContext, "The profile does not have any image",Toast.LENGTH_SHORT).show()
         }
-
-        dialog.show()
-        dialog.setCanceledOnTouchOutside(false)
     }
 
     private fun makeCall() {
@@ -170,5 +175,10 @@ class VisitedProfileActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         updateStatus("offline")
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
     }
 }
