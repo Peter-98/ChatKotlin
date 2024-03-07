@@ -1,9 +1,7 @@
 package com.pedmar.chatkotlin.adapter
 
 import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +16,17 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.pedmar.chatkotlin.model.User
+import com.google.firebase.storage.FirebaseStorage
 import com.pedmar.chatkotlin.R
-import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.chat.MessageActivity
 import com.pedmar.chatkotlin.chat.MessageGroupActivity
+import com.pedmar.chatkotlin.group.SelectDataGroup
 import com.pedmar.chatkotlin.model.Chat
+import com.pedmar.chatkotlin.model.ChatsList
 import com.pedmar.chatkotlin.model.GroupChat
+import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.profile.VisitedProfileActivity
+import java.util.logging.Logger
 
 class UserAdapter(
     context: Context,
@@ -45,6 +46,7 @@ class UserAdapter(
     private var lastMessage: String = ""
     private var countUnreadMessage: Int = 0
     private var countUnreadMessageGroup: Int = 0
+    private val logger = Logger.getLogger("MyLogger")
 
     private val selectedUsers: MutableSet<String> = mutableSetOf()
     private var addGroupButton: FloatingActionButton? = null
@@ -99,7 +101,8 @@ class UserAdapter(
             holder.username.text = user.getUsername()
 
             //Mientras se carga la imagen se mostrara ic_item_user
-            Glide.with(context).load(user.getImage()).placeholder(R.drawable.imagen_usuario_visitado)
+            Glide.with(context).load(user.getImage())
+                .placeholder(R.drawable.imagen_usuario_visitado)
                 .into(holder.userImage)
 
             // Cambiar la apariencia según si el usuario está seleccionado o no
@@ -107,6 +110,22 @@ class UserAdapter(
                 holder.itemView.setBackgroundResource(R.color.teal_200)
             } else {
                 holder.itemView.setBackgroundResource(android.R.color.transparent)
+            }
+
+            //Elimina el chat
+            holder.itemView!!.setOnLongClickListener {
+                val options = arrayOf<CharSequence>("Delete chat")
+                val builder: AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                //builder.setTitle("")
+                builder.setItems(
+                    options,
+                    DialogInterface.OnClickListener { dialogInterface, i ->
+                        if (i == 0) {
+                            deleteChat(user, null)
+                        }
+                    })
+                builder.show()
+                true
             }
 
 
@@ -201,6 +220,22 @@ class UserAdapter(
                 context.startActivity(intent)
             }
 
+            //Elimina el chat
+            holder.itemView!!.setOnLongClickListener {
+                val options = arrayOf<CharSequence>("Delete chat")
+                val builder: AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                //builder.setTitle("")
+                builder.setItems(
+                    options,
+                    DialogInterface.OnClickListener { dialogInterface, i ->
+                        if (i == 0) {
+                            deleteChat(null, groupChat)
+                        }
+                    })
+                builder.show()
+                true
+            }
+
             if (viewedChat) {
                 getLastMessage(
                     groupChat.getUidGroup(), holder.itemLastMessage
@@ -216,7 +251,8 @@ class UserAdapter(
             }
 
             //Mientras se carga la imagen se mostrara ic_item_user
-            Glide.with(context).load(groupChat.getImage()).placeholder(R.drawable.imagen_usuario_visitado)
+            Glide.with(context).load(groupChat.getImage())
+                .placeholder(R.drawable.imagen_usuario_visitado)
                 .into(holder.userImage)
         }
 
@@ -261,7 +297,8 @@ class UserAdapter(
         })
     }
 
-    private fun getNotSeenMessage(statusNotSeenMessages: ImageView, numbersNotSeenMessages: TextView
+    private fun getNotSeenMessage(
+        statusNotSeenMessages: ImageView, numbersNotSeenMessages: TextView
     ) {
         countUnreadMessage = 0
         val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -329,5 +366,159 @@ class UserAdapter(
             override fun onCancelled(error: DatabaseError) {
             }
         })
+    }
+
+    private fun deleteChat(user: User?, groupChat: GroupChat?) {
+
+        var uidReference = user?.getUid()?: groupChat!!.getUidGroup()
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
+
+        //Elimina el uid (receptor) de tu uid
+        FirebaseDatabase.getInstance().reference.child("MessageList").child(firebaseUser!!.uid)
+            .child(uidReference!!).removeValue().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    logger.info("MessageList: Usuario $uidReference eliminado de currentUser.")
+                }
+            }.addOnFailureListener { exception ->
+                logger.info("MessageList:: Error al intentar eliminar el usuario $uidReference de la base de datos:  $exception")
+            }
+
+        if (user!= null) {
+
+            //Elimina los mensajes de chats individuales
+            reference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (dataSnapshot in snapshot.children) {
+                        val chat: Chat? = dataSnapshot.getValue(Chat::class.java)
+                        if (firebaseUser != null && chat != null) {
+                            if (chat!!.getReceiver()
+                                    .equals(uidReference)
+                            ) {
+                                deleteMessage(chat)
+                            }
+                        }
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
+        }else{
+            var emptyGroup = false
+
+            //Elimina tu uid del grupo
+            FirebaseDatabase.getInstance().reference.child("MessageList").child(uidReference!!)
+                .child(firebaseUser.uid).removeValue().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        logger.info("Usuario $uidReference eliminado exitosamente.")
+                    }
+                }.addOnFailureListener { exception ->
+                    logger.info("Error al intentar eliminar el usuario $uidReference de la base de datos:  $exception")
+                }
+
+            //Elimina tu participacion del grupo
+            val referenceGroup = FirebaseDatabase.getInstance().reference.child("Groups").child(uidReference!!)
+            referenceGroup.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    val groupChat: GroupChat? = snapshot.getValue(GroupChat::class.java)
+                    if (firebaseUser != null && groupChat != null &&
+                        groupChat!!.getUidUsersList()!!.contains(firebaseUser.uid) &&
+                        groupChat!!.getColorUsersList()!!.contains(firebaseUser.uid)) {
+
+                        val uidUsersMutable = groupChat!!.getUidUsersList()!!.toMutableList()
+                        val uidColorsUsersMutable = groupChat!!.getColorUsersList()!!.toMutableMap()
+                        uidUsersMutable.remove(firebaseUser.uid)
+                        uidColorsUsersMutable.remove(firebaseUser.uid)
+
+                        // Actualizar la lista en Firebase
+                        referenceGroup.child("uidUsersList").setValue(uidUsersMutable)
+                        referenceGroup.child("colorUsersList").setValue(uidColorsUsersMutable)
+
+                        if(uidUsersMutable.isEmpty()){
+                            emptyGroup= true
+                        }
+
+                    }
+
+                }
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
+
+            //Elimina el grupo si esta vacio
+            if(emptyGroup){
+
+                //Elimina los mensajes de chats del grupo
+                reference.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (dataSnapshot in snapshot.children) {
+                            val chat: Chat? = dataSnapshot.getValue(Chat::class.java)
+                            if (firebaseUser != null && chat != null) {
+                                if (chat!!.getReceiver()
+                                        .equals(uidReference)
+                                ) {
+                                    deleteMessage(chat)
+                                }
+                            }
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+                })
+
+                //Elimina el grupo
+                FirebaseDatabase.getInstance().reference.child("Groups")
+                    .child(uidReference!!).removeValue().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            emptyGroup = false
+                            logger.info("Grupo $uidReference eliminado exitosamente.")
+                        }
+                    }.addOnFailureListener { exception ->
+                        logger.info("Error al intentar eliminar el grupo $uidReference de la base de datos:  $exception")
+                    }
+            }
+        }
+    }
+
+    private fun deleteMessage(chat: Chat) {
+        val keyMessage = chat.getKeyMessage()!!
+        var type = 0
+        if (chat.getMessage().equals("Submitted image") && !chat.getUrl()!!.isEmpty()) {
+            type = 1
+        } else if (chat.getMessage()!!.contains("File: ") && !chat.getUrl()!!.isEmpty()) {
+            type = 2
+        }
+        when (type) {
+            1 -> {
+                val storageReference = FirebaseStorage.getInstance().getReference()
+                    .child("Messages_images/$keyMessage.png")
+                storageReference.delete().addOnSuccessListener {
+                    logger.info("Imagen $keyMessage eliminado exitosamente del almacenamiento de Firebase.")
+                }.addOnFailureListener { exception ->
+                    logger.info("Error al intentar eliminar la imagen $keyMessage del almacenamiento de Firebase: $exception")
+                }
+            }
+
+            2 -> {
+                val storageReference = FirebaseStorage.getInstance().getReference()
+                    .child("Messages_documents/$keyMessage")
+                storageReference.delete().addOnSuccessListener {
+                    logger.info("Archivo $keyMessage eliminado exitosamente del almacenamiento de Firebase.")
+                }.addOnFailureListener { exception ->
+                    logger.info("Error al intentar eliminar el archivo $keyMessage del almacenamiento de Firebase: $exception")
+                }
+            }
+            else -> ""
+        }
+        FirebaseDatabase.getInstance().reference.child("Chats")
+            .child(keyMessage)
+            .removeValue().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    logger.info("Chats: Mensaje $keyMessage eliminado exitosamente.")
+                }
+            }.addOnFailureListener { exception ->
+                logger.info("Chats: Error al intentar eliminar el mensaje $keyMessage de la base de datos:  $exception")
+            }
     }
 }

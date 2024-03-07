@@ -303,15 +303,29 @@ class ProfileActivity : AppCompatActivity() {
                 REQUEST_IMAGE_CAPTURE -> {
                     val imageBitmap = data?.extras?.get("data") as Bitmap
                     //updateImageProfile.setImageBitmap(imageBitmap)
-                    updateByteArray(imageBitmap)
+                    updateByteArray(scaleBitmapToFit(imageBitmap, 300, 300))
                 }
                 REQUEST_IMAGE_PICK -> {
                     val selectedImage = data?.data
                     val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
                     //updateImageProfile.setImageBitmap(imageBitmap)
-                    updateByteArray(imageBitmap)
+                    updateByteArray(scaleBitmapToFit(imageBitmap, 300, 300))
                 }
             }
+        }
+    }
+
+    private fun scaleBitmapToFit(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        val scaleFactor = Math.min(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
+
+        return if (scaleFactor < 1) {
+            val scaledWidth = (width * scaleFactor).toInt()
+            val scaledHeight = (height * scaleFactor).toInt()
+            Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
+        } else {
+            bitmap
         }
     }
 

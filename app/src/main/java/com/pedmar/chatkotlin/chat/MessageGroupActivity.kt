@@ -161,8 +161,9 @@ class MessageGroupActivity : AppCompatActivity(){
                         }
                         val listMessageReceiver = FirebaseDatabase.getInstance().reference.child("MessageList")
                             .child(uidGroup)
-                            .child(firebaseUser!!.uid)
-                        listMessageReceiver.child("uid").setValue(firebaseUser!!.uid)
+                        for (user in userList!!){
+                            listMessageReceiver.child(user).child("uid").setValue(user)
+                        }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -472,13 +473,13 @@ class MessageGroupActivity : AppCompatActivity(){
         var ref : StorageReference? = null
 
         if(documentUri != null){
-            imageFolder = FirebaseStorage.getInstance().reference.child("Messages documents")
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages_documents")
             // Obtener el nombre del archivo original
             ref = imageFolder.child("$keyMessage")
             uploadTask = ref.putFile(documentUri)
 
         }else{
-            imageFolder = FirebaseStorage.getInstance().reference.child("Messages images")
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages_images")
             ref = imageFolder.child("$keyMessage.png")
 
             // Convierte el Bitmap a ByteArray
@@ -580,8 +581,9 @@ class MessageGroupActivity : AppCompatActivity(){
                                     val listMessageReceiver =
                                         FirebaseDatabase.getInstance().reference.child("MessageList")
                                             .child(uidGroup)
-                                            .child(firebaseUser!!.uid)
-                                    listMessageReceiver.child("uid").setValue(firebaseUser!!.uid)
+                                    for (user in userList!!){
+                                        listMessageReceiver.child(user).child("uid").setValue(user)
+                                    }
                                 }
 
                                 override fun onCancelled(error: DatabaseError) {

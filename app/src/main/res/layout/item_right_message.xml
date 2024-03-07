@@ -64,8 +64,6 @@
 
         </LinearLayout>
 
-
-
         <TextView
             android:id="@+id/seenMessage"
             android:layout_alignParentEnd="true"

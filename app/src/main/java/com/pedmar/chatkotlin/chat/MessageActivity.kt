@@ -413,13 +413,13 @@ class MessageActivity : AppCompatActivity() {
         var ref: StorageReference? = null
 
         if (documentUri != null) {
-            imageFolder = FirebaseStorage.getInstance().reference.child("Messages documents")
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages_documents")
             // Obtener el nombre del archivo original
             ref = imageFolder.child("$keyMessage")
             uploadTask = ref.putFile(documentUri)
 
         } else {
-            imageFolder = FirebaseStorage.getInstance().reference.child("Messages images")
+            imageFolder = FirebaseStorage.getInstance().reference.child("Messages_images")
             ref = imageFolder.child("$keyMessage.png")
 
             // Convierte el Bitmap a ByteArray

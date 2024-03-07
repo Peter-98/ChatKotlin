@@ -1,7 +1,9 @@
 package com.pedmar.chatkotlin
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -152,6 +154,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.menu_exit -> {
                 FirebaseAuth.getInstance().signOut()
+                signOutDevice()
                 val intent = Intent(this@MainActivity, Inicio::class.java)
                 Toast.makeText(applicationContext, "You have logged out", Toast.LENGTH_SHORT).show()
                 startActivity(intent)
@@ -162,6 +165,26 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun signOutDevice() {
+
+        val deviceId: String =
+            Settings.Secure.getString(
+                applicationContext.contentResolver,
+                Settings.Secure.ANDROID_ID
+            )
+
+        FirebaseDatabase.getInstance().reference.child(
+                "UsersDevice"
+            ).child(deviceId).removeValue().addOnCompleteListener{task->
+                if (task.isSuccessful){
+
+                }else{
+                    Toast.makeText(applicationContext, "The deviceId has not been deleted", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun updateStatus(status: String) {
