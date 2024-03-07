@@ -18,6 +18,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -46,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var forgetPassword: TextView
     private lateinit var secretKey: String
     private lateinit var qrCodeImageLogin: ImageView
+
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
 
@@ -116,11 +119,18 @@ class LoginActivity : AppCompatActivity() {
 
         if (email.isEmpty()) {
             Toast.makeText(applicationContext, "Email is empty", Toast.LENGTH_SHORT).show()
+        } else if (!isValidEmail(email)) {
+            Toast.makeText(applicationContext, "Invalid email format", Toast.LENGTH_SHORT).show()
         } else if (password.isEmpty()) {
             Toast.makeText(applicationContext, "Password is empty", Toast.LENGTH_SHORT).show()
         } else {
             loginUser(email, password)
         }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex("^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+\$")
+        return email.matches(emailRegex)
     }
 
     private fun loginUser(email: String, password: String) {
@@ -140,12 +150,30 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 } else {
                     progressDialog.dismiss()
-                    Toast.makeText(applicationContext, "An error has occurred", Toast.LENGTH_SHORT)
-                        .show()
+                    val exception = task.exception
+                    if (exception is FirebaseAuthInvalidUserException) {
+                        // El usuario no existe
+                        Toast.makeText(
+                            applicationContext,
+                            "User does not exist",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (exception is FirebaseAuthInvalidCredentialsException) {
+                        // La contraseña es incorrecta
+                        Toast.makeText(
+                            applicationContext,
+                            "Incorrect password",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        // Otro tipo de error
+                        Toast.makeText(
+                            applicationContext,
+                            "An error has occurred",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
-            }.addOnFailureListener { e ->
-                progressDialog.dismiss()
-                Toast.makeText(applicationContext, "{$e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -157,22 +185,26 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-
     /* Comprobar si ha sido seleccionada o cancelada la llamada a google*/
     private val googleSignInARL = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()){ result->
-        if(result.resultCode == RESULT_OK){
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
             val data = result.data
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
 
-            try{
+            try {
                 val account = task.getResult(ApiException::class.java)
                 checkGoogleFirebase(account.idToken)
-            }catch(e : Exception){
-                Toast.makeText(applicationContext,"An exception has occurred due to ${e.message}", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    applicationContext,
+                    "An exception has occurred due to ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        }else{
-            Toast.makeText(applicationContext,"Cancelled", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(applicationContext, "Cancelled", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -180,20 +212,19 @@ class LoginActivity : AppCompatActivity() {
     private fun checkGoogleFirebase(idToken: String?) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-            .addOnSuccessListener { authResult->
-                if (authResult.additionalUserInfo!!.isNewUser){
+            .addOnSuccessListener { authResult ->
+                if (authResult.additionalUserInfo!!.isNewUser) {
                     /* Si el usuario es nuevo */
                     saveInfoBD()
 
-                }else{
+                } else {
 
                     /* Si el usuario ya se registro previamente */
                     startActivity(Intent(this, MainActivity::class.java))
                     finishAffinity()
                 }
-                // Finalizar la actividad actual para que no aparezca en la pila de actividades
                 finish()
-            }.addOnFailureListener{e->
+            }.addOnFailureListener { e ->
                 Toast.makeText(applicationContext, "${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
@@ -228,11 +259,15 @@ class LoginActivity : AppCompatActivity() {
             .setValue(hashmap).addOnSuccessListener {
                 progressDialog.dismiss()
                 startActivity(Intent(applicationContext, MainActivity::class.java))
-                Toast.makeText(applicationContext ,"Has been successfully registered", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext,
+                    "Has been successfully registered",
+                    Toast.LENGTH_SHORT
+                ).show()
                 finishAffinity()
-            }.addOnFailureListener{e->
+            }.addOnFailureListener { e ->
                 progressDialog.dismiss()
-                Toast.makeText(applicationContext ,"${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

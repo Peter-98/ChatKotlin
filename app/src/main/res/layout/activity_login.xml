@@ -48,20 +48,22 @@
             <View
                 android:layout_width="350dp"
                 android:layout_height="2dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/purple_500" />
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="20dp"
+                android:background="@color/white" />
 
             <!-- Email -->
             <com.google.android.material.textfield.TextInputLayout
 
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:textColorHint="@color/white">
 
                 <EditText
                     android:id="@+id/L_Et_email"
-                    android:layout_width="match_parent"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:drawableStart="@drawable/ic_email"
                     android:drawablePadding="10dp"
@@ -75,14 +77,15 @@
             <!-- Password -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:textColorHint="@color/white"
                 app:passwordToggleEnabled="true">
 
                 <EditText
                     android:id="@+id/L_Et_password"
-                    android:layout_width="match_parent"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:drawableStart="@drawable/ic_password"
@@ -93,38 +96,37 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Btn_login"
+                android:layout_width="300dp"
+                app:cornerRadius="100dp"
+                android:textAllCaps="false"
+                android:layout_height="60dp"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/colorBlue"
+                android:textColor="@color/colorGrey2"
+                android:text="@string/Btn_login" />
 
             <TextView
                 android:id="@+id/L_forget_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="100dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="20dp"
                 android:padding="5dp"
                 android:text="@string/L_forget_password"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/Btn_login"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:backgroundTint="@color/colorBlue"
-                android:text="@string/Btn_login"
-                android:textColor="@color/colorGrey2"
-                app:icon="@drawable/ingresar_app"
-                app:iconTint="@color/colorGrey2" />
 
             <View
                 android:layout_width="350dp"
                 android:layout_height="2dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/purple_500" />
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="20dp"
+                android:background="@color/white" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
                 app:cardCornerRadius="20dp">
 
                 <ImageView

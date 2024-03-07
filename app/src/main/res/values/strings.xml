@@ -33,7 +33,8 @@
     <string name="L_instructions">Enter your email to reset your password</string>ç
     <string name="Btn_send_email">Send</string>
     <string name="L_Et_group_name">Enter group name</string>
-    <string name="Btn_login_google">Continue with google</string>
+    <string name="Btn_login_google">Continue with Google</string>
+    <string name="Btn_login_facebook">Continue with Facebook</string>
 
 
     <string name="username">Username</string>

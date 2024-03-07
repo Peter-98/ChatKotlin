@@ -12,6 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -102,6 +107,12 @@ class RegisterActivity : AppCompatActivity() {
                     val hUsername: String = R_Et_username.text.toString()
                     val hEmail: String = R_Et_email.text.toString()
 
+                    var customToken = postCustomToken(uid)
+                    if(customToken.isEmpty()){
+                        customToken = "Error generating custom token"
+                    }
+
+
                     hashmap["uid"] = uid
                     hashmap["username"] = hUsername
                     hashmap["email"] = hEmail
@@ -115,49 +126,27 @@ class RegisterActivity : AppCompatActivity() {
                     hashmap["status"] = "offline"
                     hashmap["provider"] = "Email"
                     hashmap["private"] = true
+                    hashmap["customToken"] = customToken
                     reference.updateChildren(hashmap)
                         .addOnCompleteListener { task2 ->
                             if (task2.isSuccessful) {
 
-                                val user = FirebaseAuth.getInstance().currentUser
-                                user?.let {
-                                    // El usuario está autenticado, obtén su token de acceso
-                                    user.getIdToken(true)
-                                        .addOnCompleteListener { task ->
-                                            if (task.isSuccessful) {
-                                                // Token obtenido con éxito
-                                                val tokenResult = task.result
-                                                val token = tokenResult?.token
-                                                if (token != null) {
+                                val deviceId: String =
+                                    Settings.Secure.getString(
+                                        applicationContext.contentResolver,
+                                        Settings.Secure.ANDROID_ID
+                                    )
+                                val reference =
+                                    FirebaseDatabase.getInstance().reference.child(
+                                        "UsersDevice"
+                                    ).child(deviceId)
 
-                                                    val deviceId: String =
-                                                        Settings.Secure.getString(
-                                                            applicationContext.contentResolver,
-                                                            Settings.Secure.ANDROID_ID
-                                                        )
-                                                    val reference =
-                                                        FirebaseDatabase.getInstance().reference.child(
-                                                            "UsersDevice"
-                                                        ).child(deviceId)
-
-                                                    val hashMap = java.util.HashMap<String, Any>()
-                                                    hashMap["idDevice"] = deviceId
-                                                    hashMap["userIdToken"] = token
-                                                    hashMap["uid"] = uid
-                                                    hashMap["enable"] = false
-                                                    reference!!.updateChildren(hashMap)
-                                                }
-                                            } else {
-                                                val exception = task.exception
-                                                Toast.makeText(
-                                                    applicationContext,
-                                                    "Error getting token: $exception",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        }
-                                }
-
+                                val hashMap = java.util.HashMap<String, Any>()
+                                hashMap["idDevice"] = deviceId
+                                hashMap["userIdToken"] = customToken
+                                hashMap["uid"] = uid
+                                hashMap["enable"] = false
+                                reference!!.updateChildren(hashMap)
 
                                 val intent = Intent(this@RegisterActivity, MainActivity::class.java)
                                 Toast.makeText(
@@ -166,7 +155,6 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 startActivity(intent)
-                                // Finalizar la actividad actual para que no aparezca en la pila de actividades
                                 finish()
                             }
 
@@ -186,4 +174,35 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "{$e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
+    private fun postCustomToken(uid: String): String{
+        val customClaims = CustomClaims("admin", "premium")
+
+        val jsonBody = Json.encodeToString(customClaims)
+        val jsonString = "{\"uid\":\"$uid\",\"customClaims\":$jsonBody}"
+
+        val url = "http://localhost:3000/generate-token"
+        var customToken = ""
+
+        url.httpPost()
+            .header("Content-Type" to "application/json")
+            .body(jsonString)
+            .response { _, _, result ->
+                when (result) {
+                    is Result.Success -> {
+                        println("Token generado: ${result.value}")
+                        customToken = result.value.toString()
+                    }
+                    is Result.Failure -> {
+                        println("Error al generar el token: ${result.error}")
+                    }
+                }
+            }
+        return customToken
+    }
+    @Serializable
+    data class CustomClaims(
+        val role: String,
+        val subscription: String
+    )
 }

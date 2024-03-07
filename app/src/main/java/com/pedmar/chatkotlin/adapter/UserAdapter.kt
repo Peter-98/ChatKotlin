@@ -99,7 +99,7 @@ class UserAdapter(
             holder.username.text = user.getUsername()
 
             //Mientras se carga la imagen se mostrara ic_item_user
-            Glide.with(context).load(user.getImage()).placeholder(R.drawable.ic_item_user)
+            Glide.with(context).load(user.getImage()).placeholder(R.drawable.imagen_usuario_visitado)
                 .into(holder.userImage)
 
             // Cambiar la apariencia según si el usuario está seleccionado o no
@@ -216,7 +216,7 @@ class UserAdapter(
             }
 
             //Mientras se carga la imagen se mostrara ic_item_user
-            Glide.with(context).load(groupChat.getImage()).placeholder(R.drawable.ic_item_user)
+            Glide.with(context).load(groupChat.getImage()).placeholder(R.drawable.imagen_usuario_visitado)
                 .into(holder.userImage)
         }
 

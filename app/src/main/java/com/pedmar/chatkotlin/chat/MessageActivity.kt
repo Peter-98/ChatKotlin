@@ -310,7 +310,6 @@ class MessageActivity : AppCompatActivity() {
         val items = arrayOf("Take Photo", "Choose from Gallery", "Select document")
 
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("Select Image")
         builder.setItems(items) { dialog, which ->
             when (which) {
                 0 -> dispatchTakePictureIntent()

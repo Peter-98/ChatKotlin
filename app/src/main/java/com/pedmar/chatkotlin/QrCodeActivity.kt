@@ -1,32 +1,23 @@
 package com.pedmar.chatkotlin
 
-import android.Manifest
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
@@ -162,7 +153,7 @@ class QrCodeActivity : AppCompatActivity() {
         })
     }
 
-    private fun saveQrDataUser(qrDataShare: String){
+    private fun saveQrDataUser(qrDataShare: String) {
 
         reference!!.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -184,12 +175,20 @@ class QrCodeActivity : AppCompatActivity() {
                                     .split("_")[0]
                             dataSnapshot.ref.updateChildren(hashMap)
 
-                            Toast.makeText(applicationContext, "User ${userSecondary.getUsername()} added", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                applicationContext,
+                                "User ${userSecondary.getUsername()} added",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             val intent = Intent(this@QrCodeActivity, MessageActivity::class.java)
                             intent.putExtra("userUid", qrDataShare!!.split("_")[0])
                             this@QrCodeActivity.startActivity(intent)
-                        }else{
-                            Toast.makeText(applicationContext, "Previously added user", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(
+                                applicationContext,
+                                "Previously added user",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
 
@@ -251,10 +250,11 @@ class QrCodeActivity : AppCompatActivity() {
         val result: IntentResult =
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            if (result.contents != null) {{}
-                if(result.contents.contains("login: ")){
+            if (result.contents != null) {
+                {}
+                if (result.contents.contains("login: ")) {
                     loginWithQr(result.contents.split("login: ")[1])
-                }else{
+                } else {
                     saveQrDataUser(result.contents)
                 }
 
@@ -266,6 +266,7 @@ class QrCodeActivity : AppCompatActivity() {
         }
 
     }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun loginWithQr(deviceIdEncrypted: String) {
 
@@ -273,7 +274,8 @@ class QrCodeActivity : AppCompatActivity() {
             "AES/CBC/PKCS5Padding",
             deviceIdEncrypted,
             SecretKeySpec(loadSecretKey().toByteArray(), "AES"),
-            IvParameterSpec(ByteArray(16)))
+            IvParameterSpec(ByteArray(16))
+        )
 
         val reference =
             FirebaseDatabase.getInstance().reference.child("UsersDevice").child(decodeDeviceId)

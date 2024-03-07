@@ -16,6 +16,7 @@ class User {
     private var private : Boolean = true
     private var knownPrivateUsers : List<String> = emptyList()
     private var qrDataShare : String = ""
+    private var customToken : String = ""
 
     constructor()
 
@@ -33,7 +34,8 @@ class User {
         provider: String,
         private: Boolean,
         knownPrivateUsers: List<String>,
-        qrDataShare : String
+        qrDataShare : String,
+        customToken : String
     ) {
         this.uid = uid
         this.username = username
@@ -49,6 +51,7 @@ class User {
         this.private = private
         this.knownPrivateUsers = knownPrivateUsers
         this.qrDataShare = qrDataShare
+        this.customToken = customToken
     }
 
     //getters y setters
@@ -162,6 +165,14 @@ class User {
 
     fun setQrDataShare(qrDataShare : String){
         this.qrDataShare = qrDataShare
+    }
+
+    fun getCustomToken() : String{
+        return customToken
+    }
+
+    fun setCustomToken(customToken : String){
+        this.customToken = customToken
     }
 
 }
