@@ -36,6 +36,7 @@
             tools:replace="screenOrientation" />
         <activity
             android:name=".QrCodeActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".CheckContactsActivity"
@@ -48,6 +49,7 @@
             android:exported="false" />
         <activity
             android:name=".group.VisitedGroupActivity"
+            android:parentActivityName=".chat.MessageGroupActivity"
             android:exported="false" />
         <activity
             android:name=".group.SelectDataGroup"
@@ -57,15 +59,18 @@
             android:exported="false" />
         <activity
             android:name=".chat.MessageGroupActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".ForgetPasswordActivity"
             android:exported="false" />
         <activity
             android:name=".profile.VisitedProfileActivity"
+            android:parentActivityName=".chat.MessageActivity"
             android:exported="false" />
         <activity
             android:name=".chat.MessageActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".profile.ProfileActivity"

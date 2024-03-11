@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -88,6 +89,17 @@ class QrCodeActivity : AppCompatActivity() {
     }
 
     private fun initializeVariables() {
+
+        var toolbar: Toolbar = findViewById(R.id.toolbarMain)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+
+        // Habilitar la flecha de retroceso
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        }
+
         reference = FirebaseDatabase.getInstance().reference.child("Users")
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
         firebaseUser = FirebaseAuth.getInstance().currentUser

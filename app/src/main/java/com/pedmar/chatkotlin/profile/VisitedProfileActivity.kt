@@ -32,6 +32,7 @@ class VisitedProfileActivity : AppCompatActivity() {
     private lateinit var pvAge : TextView
     private lateinit var pvProvider : TextView
     private lateinit var pvUserImage : ImageView
+    private lateinit var backArrow : ImageView
     private lateinit var btnCall : Button
     var visitedUidUser = ""
     var firebaseUser : FirebaseUser ?= null
@@ -53,6 +54,10 @@ class VisitedProfileActivity : AppCompatActivity() {
 
         pvUserImage.setOnClickListener{
             getImage()
+        }
+
+        backArrow.setOnClickListener(){
+            finish()
         }
     }
 
@@ -123,6 +128,7 @@ class VisitedProfileActivity : AppCompatActivity() {
 
     private fun initializeVariables(){
 
+        backArrow = findViewById(R.id.back_arrow)
         pvUsername = findViewById(R.id.PV_username)
         pvEmail = findViewById(R.id.PV_email)
         pvNames = findViewById(R.id.PV_name)

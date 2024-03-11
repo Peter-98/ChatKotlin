@@ -9,6 +9,14 @@
     tools:context=".profile.VisitedProfileActivity"
     android:background="?attr/backgroundChat">
 
+    <ImageView
+        android:id="@+id/back_arrow"
+        android:src="@drawable/ic_back_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"/>
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +27,7 @@
             android:text="@string/PV_profile"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

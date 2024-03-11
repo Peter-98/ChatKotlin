@@ -34,15 +34,18 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var name : EditText
     private lateinit var surnames : EditText
     private lateinit var age : EditText
+    private lateinit var location : EditText
     private lateinit var phone : TextView
     private lateinit var btnSave : Button
     private lateinit var provider : TextView
     private lateinit var editPhone : ImageView
     private lateinit var btnVerify : MaterialButton
     private lateinit var checkBoxPrivate: CheckBox
+    private lateinit var backArrow : ImageView
 
     private var user : FirebaseUser?= null
     private var reference : DatabaseReference?=null
+    private var userData : User?= null
 
     private var phoneCode = ""
     private var phoneNumber = ""
@@ -63,7 +66,15 @@ class ProfileActivity : AppCompatActivity() {
         statusVerifyAccount()
 
         btnSave.setOnClickListener{
-            updateData()
+            if(checkData()){
+                updateData()
+            }else{
+                Toast.makeText(applicationContext,"No data has changed",Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        backArrow.setOnClickListener(){
+            finish()
         }
 
         image.setOnClickListener{
@@ -84,6 +95,15 @@ class ProfileActivity : AppCompatActivity() {
                 confirmVerify()
             }
         }
+    }
+
+    private fun checkData(): Boolean {
+        return !(userData!!.getName().equals(name.text.toString()) &&
+            userData!!.getSurnames().equals(surnames.text.toString()) &&
+            userData!!.getAge().equals(age.text.toString()) &&
+            userData!!.getPhone().equals(phone.text.toString()) &&
+            userData!!.getLocation().equals(location.text.toString()) &&
+            userData!!.isPrivate().equals(checkBoxPrivate.isChecked))
     }
 
     private fun confirmVerify() {
@@ -157,11 +177,13 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun initializeVariables(){
+        backArrow = findViewById(R.id.back_arrow)
         image = findViewById(R.id.P_image)
         username = findViewById(R.id.P_username)
         email = findViewById(R.id.P_email)
         name = findViewById(R.id.P_name)
         surnames = findViewById(R.id.P_surnames)
+        location = findViewById(R.id.P_location)
         age = findViewById(R.id.P_age)
         phone = findViewById(R.id.P_phone)
         btnSave = findViewById(R.id.Btn_save)
@@ -186,6 +208,8 @@ class ProfileActivity : AppCompatActivity() {
                     //Obtener datos de firebase y seteamos
                     val user : User?= snapshot.getValue(User::class.java)
 
+                    userData = user
+                    location.setText(user!!.getLocation())
                     username.text = user!!.getUsername()
                     email.text = user!!.getEmail()
                     name.setText(user!!.getName())

@@ -37,6 +37,7 @@ class VisitedGroupActivity : AppCompatActivity() {
 
     private lateinit var gvGroupName : TextView
     private lateinit var gvGroupImage : ImageView
+    private lateinit var backArrow : ImageView
     private var gvUsers : RecyclerView?=null
     private var uidGroup = ""
     private var firebaseUser : FirebaseUser ?= null
@@ -56,6 +57,11 @@ class VisitedGroupActivity : AppCompatActivity() {
 
         val context = this
         getGroupData(context)
+
+
+        backArrow.setOnClickListener(){
+            finish()
+        }
 
 
         gvGroupImage.setOnClickListener{
@@ -119,6 +125,7 @@ class VisitedGroupActivity : AppCompatActivity() {
 
     private fun initializeVariables(){
 
+        backArrow = findViewById(R.id.back_arrow)
         gvGroupName = findViewById(R.id.GV_groupName)
         gvGroupImage = findViewById(R.id.GV_groupImage)
         firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -313,4 +320,9 @@ class VisitedGroupActivity : AppCompatActivity() {
             }
 
         }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
 }

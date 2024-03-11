@@ -14,7 +14,6 @@
         android:orientation="vertical"
         android:background="?attr/backgroundChat">
 
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,10 +21,18 @@
 
             <!-- Banner -->
             <ImageView
-                android:src="@drawable/banner1"
+                android:src="@drawable/banner2"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
                 android:scaleType="centerCrop"/>
+
+            <ImageView
+                android:id="@+id/back_arrow"
+                android:src="@drawable/ic_back_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"/>
 
             <!-- image profile -->
             <ImageView
@@ -168,25 +175,41 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/P_location"
+                    android:hint="@string/P_location"
+                    android:inputType="number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="15dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <ImageView
+                    android:id="@+id/edit_phone"
+                    android:src="@drawable/phone_number"
+                    android:layout_marginStart="15dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"/>
+
                     <TextView
                         android:id="@+id/P_phone"
                         android:text="@string/P_phone"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:gravity="center"
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"/>
-                    <ImageView
-                        android:id="@+id/edit_phone"
-                        android:src="@drawable/phone"
-                        android:layout_marginStart="15dp"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"/>
+
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 

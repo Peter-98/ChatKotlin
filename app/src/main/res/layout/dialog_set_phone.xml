@@ -40,6 +40,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Btn_accept_phone"
+        android:backgroundTint="#404249"
         android:text="@string/Btn_accept_phone"
         android:layout_marginTop="10dp"
         android:layout_gravity="center"

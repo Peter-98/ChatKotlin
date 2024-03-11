@@ -58,6 +58,12 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.title = ""
 
+        // Habilitar la flecha de retroceso
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        }
+
         firebaseUser = FirebaseAuth.getInstance().currentUser
         reference =
             FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
@@ -72,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         //Agregar los fragmentos al adaptador
         viewPagerAdapter.addItem(ChatsFragment(), "Chats")
-        viewPagerAdapter.addItem(UsersFragment(), "Users")
+        viewPagerAdapter.addItem(UsersFragment(), "Discover")
 
         //Setear el adaptador al viewPager
         viewPager.adapter = viewPagerAdapter
@@ -90,8 +96,6 @@ class MainActivity : AppCompatActivity() {
     private fun getData() {
         reference!!.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-
-                //Si el usuario existe
                 if (snapshot.exists()) {
                     val user: User? = snapshot.getValue(User::class.java)
                     username.text = user!!.getUsername()
@@ -117,7 +121,6 @@ class MainActivity : AppCompatActivity() {
             return fragmentList[position]
         }
 
-        //Cambiar nombre de la stat
         override fun getPageTitle(position: Int): CharSequence {
             return titlesList[position]
         }
@@ -163,6 +166,11 @@ class MainActivity : AppCompatActivity() {
                 return true
 
             }
+            android.R.id.home -> {
+                // Cerrar la aplicación al presionar el botón de retroceso en la barra de herramientas
+                finishAffinity()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -204,4 +212,9 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         updateStatus("offline")
     }
+
+    override fun onBackPressed() {
+        finishAffinity()
+    }
+
 }

@@ -52,6 +52,7 @@
     <string name="P_email">Email</string>
     <string name="P_phone">Phone number</string>
     <string name="P_age">Age</string>
+    <string name="P_location">Location</string>
     <string name="P_name">Name</string>
     <string name="P_surnames">Surnames</string>
     <string name="P_provider_txt">Provider : </string>

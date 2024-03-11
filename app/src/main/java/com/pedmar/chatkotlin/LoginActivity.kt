@@ -13,6 +13,8 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -30,7 +32,10 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.model.UsersDevice
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -146,6 +151,7 @@ class LoginActivity : AppCompatActivity() {
                         "You have logged in successfully",
                         Toast.LENGTH_SHORT
                     ).show()
+                    getData()
                     startActivity(intent)
                     finish()
                 } else {
@@ -213,12 +219,18 @@ class LoginActivity : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
             .addOnSuccessListener { authResult ->
+
                 if (authResult.additionalUserInfo!!.isNewUser) {
                     /* Si el usuario es nuevo */
-                    saveInfoBD()
+                    var customToken = postCustomToken(auth.uid!!)
+                    if(customToken.isEmpty()){
+                        customToken = "Error generating custom token"
+                    }
+                    saveInfoBD(customToken)
+                    saveDevice(customToken)
 
                 } else {
-
+                    getData()
                     /* Si el usuario ya se registro previamente */
                     startActivity(Intent(this, MainActivity::class.java))
                     finishAffinity()
@@ -229,7 +241,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveInfoBD() {
+    private fun saveInfoBD(customToken: String) {
         progressDialog.setMessage("Your information is being saved...")
         progressDialog.show()
 
@@ -253,6 +265,8 @@ class LoginActivity : AppCompatActivity() {
         hashmap["age"] = ""
         hashmap["status"] = "offline"
         hashmap["provider"] = "Google"
+        hashmap["private"] = true
+        hashmap["customToken"] = customToken
 
         val reference = FirebaseDatabase.getInstance().getReference("Users")
         reference.child(uidGoogle!!)
@@ -388,5 +402,69 @@ class LoginActivity : AppCompatActivity() {
         val inputStream = assetManager.open("configs/config.properties")
         properties.load(inputStream)
         return properties.getProperty("secretKey")
+    }
+
+    private fun saveDevice(customToken: String){
+
+        val deviceId: String =
+            Settings.Secure.getString(
+                applicationContext.contentResolver,
+                Settings.Secure.ANDROID_ID
+            )
+        val reference =
+            FirebaseDatabase.getInstance().reference.child(
+                "UsersDevice"
+            ).child(deviceId)
+
+        val hashMap = java.util.HashMap<String, Any>()
+        hashMap["idDevice"] = deviceId
+        hashMap["userIdToken"] = customToken
+        hashMap["uid"] = auth.uid!!
+        hashMap["enable"] = false
+        reference!!.updateChildren(hashMap)
+
+    }
+
+    private fun getData() {
+        val reference = FirebaseDatabase.getInstance().reference.child("Users").child(auth.uid!!)
+        reference!!.addListenerForSingleValueEvent (object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val user: User? = snapshot.getValue(User::class.java)
+                    if(user != null) {
+                        saveDevice(user!!.getCustomToken())
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
+    private fun postCustomToken(uid: String): String{
+        val customClaims = RegisterActivity.CustomClaims("admin", "premium")
+
+        val jsonBody = Json.encodeToString(customClaims)
+        val jsonString = "{\"uid\":\"$uid\",\"customClaims\":$jsonBody}"
+
+        val url = "http://localhost:3000/generate-token"
+        var customToken = ""
+
+        url.httpPost()
+            .header("Content-Type" to "application/json")
+            .body(jsonString)
+            .response { _, _, result ->
+                when (result) {
+                    is Result.Success -> {
+                        println("Token generado: ${result.value}")
+                        customToken = result.value.toString()
+                    }
+                    is Result.Failure -> {
+                        println("Error al generar el token: ${result.error}")
+                    }
+                }
+            }
+        return customToken
     }
 }

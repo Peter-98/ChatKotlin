@@ -289,6 +289,12 @@ class MessageActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.title = ""
 
+        // Habilitar la flecha de retroceso
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        }
+
         apiService =
             Client.Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
 
@@ -608,8 +614,8 @@ class MessageActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+        //val intent = Intent(this, MainActivity::class.java)
+        //startActivity(intent)
         finish()
     }
 }
