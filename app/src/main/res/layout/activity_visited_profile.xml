@@ -164,6 +164,31 @@
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <!-- Ubicacion-->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="@string/PV_location_txt"
+                android:layout_marginStart="30dp"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/PV_location"
+                android:text="@string/PV_age"
+                android:layout_marginStart="5dp"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
         <!-- Proveedor-->
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_marginTop="10dp"
@@ -204,6 +229,7 @@
         <Button
             app:icon="@drawable/ic_call"
             app:iconTint="@color/white"
+            android:backgroundTint="#404249"
             android:textColor="@color/white"
             android:id="@+id/Btn_call"
             android:text="@string/Btn_call"

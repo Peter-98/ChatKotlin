@@ -98,6 +98,8 @@
     <string name="PV_age"> -- </string>
     <string name="PV_provider_txt">Provider: </string>
     <string name="PV_provider"> -- </string>
+    <string name="PV_location_txt">Location: </string>
+    <string name="PV_location"> -- </string>
 
     <string name="Btn_call"> Call </string>
 

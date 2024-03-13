@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -33,6 +34,16 @@ class CreateGroupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_group)
+
+        var toolbar: Toolbar = findViewById(R.id.toolbarMain)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+
+        // Habilitar la flecha de retroceso
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        }
 
         rvUsers = findViewById(R.id.RV_users)
         rvUsers!!.setHasFixedSize(true)

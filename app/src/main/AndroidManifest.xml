@@ -53,9 +53,11 @@
             android:exported="false" />
         <activity
             android:name=".group.SelectDataGroup"
+            android:parentActivityName=".group.CreateGroupActivity"
             android:exported="false" />
         <activity
             android:name=".group.CreateGroupActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".chat.MessageGroupActivity"

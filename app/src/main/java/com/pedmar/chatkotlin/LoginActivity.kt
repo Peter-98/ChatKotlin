@@ -36,7 +36,11 @@ import com.pedmar.chatkotlin.model.User
 import com.pedmar.chatkotlin.model.UsersDevice
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.util.*
+import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -56,8 +60,14 @@ class LoginActivity : AppCompatActivity() {
 
 
     private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private lateinit var urlGenerateToken: String
+    private val logger = Logger.getLogger("MyLogger")
+
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
 
     private val qrCodeWidthPixels = 750
+
 
     @SuppressLint("HardwareIds")
     @RequiresApi(Build.VERSION_CODES.O)
@@ -94,14 +104,21 @@ class LoginActivity : AppCompatActivity() {
 
 
         // Establece un temporizador para verificar la base de datos cada x segundos
-        val handler = Handler(Looper.getMainLooper())
+        handler = Handler(Looper.getMainLooper())
         val delay = 5000L // Verificar cada 5 segundos (5000 milisegundos)
-        handler.postDelayed(object : Runnable {
+        runnable = object : Runnable {
             override fun run() {
                 checkDatabase(deviceId)
                 handler.postDelayed(this, delay)
             }
-        }, delay)
+        }
+        handler.postDelayed(runnable, delay)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Detener el Runnable cuando se destruye la actividad para evitar fugas de memoria
+        handler.removeCallbacks(runnable)
     }
 
     private fun initializeVariables() {
@@ -116,6 +133,7 @@ class LoginActivity : AppCompatActivity() {
         forgetPassword = findViewById(R.id.L_forget_password)
         secretKey = loadSecretKey()
         qrCodeImageLogin = findViewById(R.id.qrCodeImageLogin)
+        urlGenerateToken = loadUrlPost()
     }
 
     private fun checkData() {
@@ -215,6 +233,7 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("HardwareIds")
     private fun checkGoogleFirebase(idToken: String?) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
@@ -222,12 +241,16 @@ class LoginActivity : AppCompatActivity() {
 
                 if (authResult.additionalUserInfo!!.isNewUser) {
                     /* Si el usuario es nuevo */
-                    var customToken = postCustomToken(auth.uid!!)
-                    if(customToken.isEmpty()){
-                        customToken = "Error generating custom token"
-                    }
-                    saveInfoBD(customToken)
-                    saveDevice(customToken)
+
+
+                    val deviceId: String =
+                        Settings.Secure.getString(
+                            applicationContext.contentResolver,
+                            Settings.Secure.ANDROID_ID
+                        )
+                    saveInfoBD()
+                    saveDevice(deviceId)
+                    postCustomToken(auth.uid!!, deviceId)
 
                 } else {
                     getData()
@@ -241,7 +264,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveInfoBD(customToken: String) {
+    private fun saveInfoBD() {
         progressDialog.setMessage("Your information is being saved...")
         progressDialog.show()
 
@@ -266,7 +289,6 @@ class LoginActivity : AppCompatActivity() {
         hashmap["status"] = "offline"
         hashmap["provider"] = "Google"
         hashmap["private"] = true
-        hashmap["customToken"] = customToken
 
         val reference = FirebaseDatabase.getInstance().getReference("Users")
         reference.child(uidGoogle!!)
@@ -325,6 +347,7 @@ class LoginActivity : AppCompatActivity() {
                         ).show()
                         startActivity(intent)
                         finish()
+
                     } else {
                         progressDialog.dismiss()
                         Toast.makeText(
@@ -404,13 +427,8 @@ class LoginActivity : AppCompatActivity() {
         return properties.getProperty("secretKey")
     }
 
-    private fun saveDevice(customToken: String){
+    private fun saveDevice(deviceId: String){
 
-        val deviceId: String =
-            Settings.Secure.getString(
-                applicationContext.contentResolver,
-                Settings.Secure.ANDROID_ID
-            )
         val reference =
             FirebaseDatabase.getInstance().reference.child(
                 "UsersDevice"
@@ -418,7 +436,6 @@ class LoginActivity : AppCompatActivity() {
 
         val hashMap = java.util.HashMap<String, Any>()
         hashMap["idDevice"] = deviceId
-        hashMap["userIdToken"] = customToken
         hashMap["uid"] = auth.uid!!
         hashMap["enable"] = false
         reference!!.updateChildren(hashMap)
@@ -432,7 +449,7 @@ class LoginActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     val user: User? = snapshot.getValue(User::class.java)
                     if(user != null) {
-                        saveDevice(user!!.getCustomToken())
+                        saveDevice(user!!.getUserIdToken())
                     }
                 }
             }
@@ -442,29 +459,51 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun postCustomToken(uid: String): String{
+    private fun loadUrlPost(): String {
+        val properties = Properties()
+        val assetManager = applicationContext.assets
+        val inputStream = assetManager.open("configs/config.properties")
+        properties.load(inputStream)
+        return properties.getProperty("urlGenerateToken")
+    }
+
+    private fun postCustomToken(uid: String, deviceId: String): String {
         val customClaims = RegisterActivity.CustomClaims("admin", "premium")
 
         val jsonBody = Json.encodeToString(customClaims)
         val jsonString = "{\"uid\":\"$uid\",\"customClaims\":$jsonBody}"
 
-        val url = "http://localhost:3000/generate-token"
         var customToken = ""
 
-        url.httpPost()
+        urlGenerateToken.httpPost()
             .header("Content-Type" to "application/json")
             .body(jsonString)
             .response { _, _, result ->
                 when (result) {
                     is Result.Success -> {
-                        println("Token generado: ${result.value}")
-                        customToken = result.value.toString()
+                        val jsonValue = result.value.joinToString(separator = "") { it.toChar().toString() }
+                        logger.info("Token generado: $jsonValue")
+                        // Parsear el JSON para obtener el valor de la variable 'token'
+                        val jsonObject = Json.parseToJsonElement(jsonValue).jsonObject
+                        val tokenValue = jsonObject["token"]?.jsonPrimitive?.contentOrNull
+
+                        if (tokenValue != null) {
+                            val reference =
+                                FirebaseDatabase.getInstance().reference.child("UsersDevice").child(deviceId)
+                            val hashMap = HashMap<String, Any>()
+                            hashMap["userIdToken"] = tokenValue
+                            reference!!.updateChildren(hashMap)
+                        } else {
+                            logger.info("Error: No se encontró la variable 'token' en el JSON.")
+                        }
                     }
                     is Result.Failure -> {
-                        println("Error al generar el token: ${result.error}")
+                        logger.info("Error al generar el token: ${result.error}")
                     }
                 }
             }
         return customToken
     }
+
+
 }

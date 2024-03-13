@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -67,6 +68,17 @@ class SelectDataGroup  : AppCompatActivity(){
     }
 
     private fun initializeViews(){
+
+        var toolbar: Toolbar = findViewById(R.id.toolbarMain)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+
+        // Habilitar la flecha de retroceso
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        }
+
         etName = findViewById(R.id.Et_name)
         btnSendEmail = findViewById(R.id.Btn_send_email)
         firebaseAuth = FirebaseAuth.getInstance()

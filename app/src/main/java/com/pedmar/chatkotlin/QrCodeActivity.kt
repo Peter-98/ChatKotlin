@@ -289,14 +289,33 @@ class QrCodeActivity : AppCompatActivity() {
             IvParameterSpec(ByteArray(16))
         )
 
-        val reference =
-            FirebaseDatabase.getInstance().reference.child("UsersDevice").child(decodeDeviceId)
 
-        val hashMap = HashMap<String, Any>()
-        hashMap["idDevice"] = decodeDeviceId
-        hashMap["uid"] = firebaseUser!!.uid
-        hashMap["enable"] = true
-        reference!!.updateChildren(hashMap)
+        FirebaseDatabase.getInstance().reference.child("Users").child(firebaseUser!!.uid)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val user: User? = snapshot.getValue(User::class.java)
+                        if(user != null){
+                            val reference =
+                                FirebaseDatabase.getInstance().reference.child("UsersDevice").child(decodeDeviceId)
+
+                            val hashMap = HashMap<String, Any>()
+                            hashMap["idDevice"] = decodeDeviceId
+                            hashMap["uid"] = firebaseUser!!.uid
+                            hashMap["enable"] = true
+                            hashMap["userIdToken"] = user.getUserIdToken()
+                            reference!!.updateChildren(hashMap)
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+
+            })
+
+
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

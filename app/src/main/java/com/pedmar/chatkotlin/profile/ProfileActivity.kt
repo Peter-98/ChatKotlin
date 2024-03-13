@@ -229,6 +229,7 @@ class ProfileActivity : AppCompatActivity() {
     private fun updateData(){
 
         val hashmap = HashMap<String, Any>()
+        hashmap["location"] = location.text.toString()
         hashmap["name"] = name.text.toString()
         hashmap["surnames"] = surnames.text.toString()
         hashmap["age"] = age.text.toString()

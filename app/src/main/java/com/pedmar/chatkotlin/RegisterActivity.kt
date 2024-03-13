@@ -17,6 +17,12 @@ import com.github.kittinunf.result.Result
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.util.*
+import java.util.logging.Logger
+import kotlin.collections.HashMap
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -29,6 +35,9 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var reference: DatabaseReference
     private lateinit var progressDialog: ProgressDialog
+
+    private lateinit var urlGenerateToken: String
+    private val logger = Logger.getLogger("MyLogger")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +60,15 @@ class RegisterActivity : AppCompatActivity() {
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Registering information")
         progressDialog.setCanceledOnTouchOutside(false)
+        urlGenerateToken = loadUrlPost()
+    }
+
+    private fun loadUrlPost(): String {
+        val properties = Properties()
+        val assetManager = applicationContext.assets
+        val inputStream = assetManager.open("configs/config.properties")
+        properties.load(inputStream)
+        return properties.getProperty("urlGenerateToken")
     }
 
     private fun checkData() {
@@ -107,11 +125,11 @@ class RegisterActivity : AppCompatActivity() {
                     val hUsername: String = R_Et_username.text.toString()
                     val hEmail: String = R_Et_email.text.toString()
 
-                    var customToken = postCustomToken(uid)
-                    if(customToken.isEmpty()){
-                        customToken = "Error generating custom token"
-                    }
-
+                    val deviceId: String =
+                        Settings.Secure.getString(
+                            applicationContext.contentResolver,
+                            Settings.Secure.ANDROID_ID
+                        )
 
                     hashmap["uid"] = uid
                     hashmap["username"] = hUsername
@@ -126,16 +144,9 @@ class RegisterActivity : AppCompatActivity() {
                     hashmap["status"] = "offline"
                     hashmap["provider"] = "Email"
                     hashmap["private"] = true
-                    hashmap["customToken"] = customToken
                     reference.updateChildren(hashmap)
                         .addOnCompleteListener { task2 ->
                             if (task2.isSuccessful) {
-
-                                val deviceId: String =
-                                    Settings.Secure.getString(
-                                        applicationContext.contentResolver,
-                                        Settings.Secure.ANDROID_ID
-                                    )
                                 val reference =
                                     FirebaseDatabase.getInstance().reference.child(
                                         "UsersDevice"
@@ -143,10 +154,11 @@ class RegisterActivity : AppCompatActivity() {
 
                                 val hashMap = java.util.HashMap<String, Any>()
                                 hashMap["idDevice"] = deviceId
-                                hashMap["userIdToken"] = customToken
                                 hashMap["uid"] = uid
                                 hashMap["enable"] = false
                                 reference!!.updateChildren(hashMap)
+
+                                postCustomToken(uid, deviceId)
 
                                 val intent = Intent(this@RegisterActivity, MainActivity::class.java)
                                 Toast.makeText(
@@ -175,26 +187,38 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
-    private fun postCustomToken(uid: String): String{
-        val customClaims = CustomClaims("admin", "premium")
+    private fun postCustomToken(uid: String, deviceId: String): String {
+        val customClaims = RegisterActivity.CustomClaims("admin", "premium")
 
         val jsonBody = Json.encodeToString(customClaims)
         val jsonString = "{\"uid\":\"$uid\",\"customClaims\":$jsonBody}"
 
-        val url = "http://localhost:3000/generate-token"
         var customToken = ""
 
-        url.httpPost()
+        urlGenerateToken.httpPost()
             .header("Content-Type" to "application/json")
             .body(jsonString)
             .response { _, _, result ->
                 when (result) {
                     is Result.Success -> {
-                        println("Token generado: ${result.value}")
-                        customToken = result.value.toString()
+                        val jsonValue = result.value.joinToString(separator = "") { it.toChar().toString() }
+                        logger.info("Token generado: $jsonValue")
+                        // Parsear el JSON para obtener el valor de la variable 'token'
+                        val jsonObject = Json.parseToJsonElement(jsonValue).jsonObject
+                        val tokenValue = jsonObject["token"]?.jsonPrimitive?.contentOrNull
+
+                        if (tokenValue != null) {
+                            val reference =
+                                FirebaseDatabase.getInstance().reference.child("UsersDevice").child(deviceId)
+                            val hashMap = java.util.HashMap<String, Any>()
+                            hashMap["userIdToken"] = tokenValue
+                            reference!!.updateChildren(hashMap)
+                        } else {
+                            logger.info("Error: No se encontró la variable 'token' en el JSON.")
+                        }
                     }
                     is Result.Failure -> {
-                        println("Error al generar el token: ${result.error}")
+                        logger.info("Error al generar el token: ${result.error}")
                     }
                 }
             }

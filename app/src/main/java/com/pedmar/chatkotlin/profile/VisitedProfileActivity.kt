@@ -30,6 +30,7 @@ class VisitedProfileActivity : AppCompatActivity() {
     private lateinit var pvSurnames : TextView
     private lateinit var pvPhone : TextView
     private lateinit var pvAge : TextView
+    private lateinit var pvLocation : TextView
     private lateinit var pvProvider : TextView
     private lateinit var pvUserImage : ImageView
     private lateinit var backArrow : ImageView
@@ -135,6 +136,7 @@ class VisitedProfileActivity : AppCompatActivity() {
         pvSurnames = findViewById(R.id.PV_surnames)
         pvPhone = findViewById(R.id.PV_phone)
         pvAge = findViewById(R.id.PV_age)
+        pvLocation = findViewById(R.id.PV_location)
         pvProvider = findViewById(R.id.PV_provider)
         pvUserImage = findViewById(R.id.PV_userImage)
         btnCall = findViewById(R.id.Btn_call)
@@ -157,6 +159,7 @@ class VisitedProfileActivity : AppCompatActivity() {
                 pvAge.text = user.getAge()
                 pvPhone.text = user.getPhone()
                 pvProvider.text = user.getProvider()
+                pvLocation.text = user.getLocation()
 
                 Glide.with(applicationContext).load(user.getImage()).placeholder(R.drawable.imagen_usuario_visitado)
                     .into(pvUserImage)

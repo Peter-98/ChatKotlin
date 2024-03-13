@@ -6,44 +6,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".group.SelectDataGroup"
     android:background="?attr/backgroundChat">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        app:lottie_fileName="password.json"
-        app:lottie_imageAssetsFolder="assets"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        app:lottie_loop="true"
-        app:lottie_autoPlay="true"/>
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:text="@string/L_forget_password"
-        android:layout_gravity="center"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarMain"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
 
-    <TextView
-        android:text="@string/L_instructions"
-        android:textSize="16sp"
-        android:layout_marginTop="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+            <TextView
+                android:text="Create a group"
+                android:textColor="#ffff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </TextView>
 
-    <!-- image profile -->
-    <ImageView
-        android:id="@+id/Iv_image"
-        android:background="#354f60"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="30dp"
-        android:scaleType="centerCrop"
-        android:layout_width="140dp"
-        android:layout_height="140dp"/>
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/Iv_image"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="30dp"
+            android:background="#354f60"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintVertical_bias="0.5" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <!--Name-->
@@ -57,7 +61,6 @@
             android:id="@+id/Et_name"
             android:hint="@string/L_Et_group_name"
             android:inputType="text"
-            android:drawableStart="@drawable/ic_email"
             android:padding="20dp"
             android:drawablePadding="10dp"
             android:layout_width="match_parent"
@@ -67,10 +70,10 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Btn_send_email"
-        app:icon="@drawable/ic_send_email"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
+        android:text="Create group"
         android:backgroundTint="@color/colorBlue"
         android:textColor="@color/colorGrey2"
         app:iconTint="@color/colorGrey2"
