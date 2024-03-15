@@ -128,8 +128,6 @@ class UsersFragment : Fragment() {
                 val consult = FirebaseDatabase.getInstance().reference
                     .child("Users")
                     .orderByChild("search")
-                    .startAt(userToSearch)
-                    .endAt(userToSearch + "\uf8ff")
 
                 consult.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -140,7 +138,11 @@ class UsersFragment : Fragment() {
 
                             if (user != null && myUser != null &&
                                 !user.getUid().equals(currentUserUid) &&
-                                (!user.isPrivate() || myUser.getKnownPrivateUsers().contains(user.getUid()))
+                                (!user.isPrivate() || myUser.getKnownPrivateUsers().contains(user.getUid())) &&
+                                (user.getName()!!.contains(userToSearch, ignoreCase = true) ||
+                                        user.getSurnames()!!.contains(userToSearch, ignoreCase = true) ||
+                                        user.getLocation().contains(userToSearch, ignoreCase = true) ||
+                                        user.getSearch()!!.contains(userToSearch, ignoreCase = true))
                             ) {
                                 (userList as ArrayList<User>).add(user)
                             }
@@ -159,16 +161,19 @@ class UsersFragment : Fragment() {
                         // Setear el adaptador al RecyclerView
                         rvUsers!!.adapter = userAdapter
                     }
+
                     override fun onCancelled(error: DatabaseError) {
                         // Manejar errores de cancelación
                     }
                 })
             }
+
             override fun onCancelled(myUserError: DatabaseError) {
                 // Manejar errores al obtener el usuario actual
             }
         })
     }
+
 
 
 

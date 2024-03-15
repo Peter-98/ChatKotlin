@@ -58,11 +58,11 @@ class QrCodeActivity : AppCompatActivity() {
         // Registrar esta actividad con el Singleton
         ActivityManager.setQrCodeActivity(this)
 
-        Glide.with(applicationContext).load(R.drawable.example_qr_code).into(qrCodeImageView)
+        Glide.with(applicationContext).load(R.drawable.example_qr).into(qrCodeImageView)
 
         generateButton.setOnClickListener {
-            val inputData =
-                "John Doe\nCEO\nAcme Corporation\njohndoe@example.com" // Business card data
+
+            //val inputData ="John Doe\nCEO\nAcme Corporation\njohndoe@example.com" // Business card data
 
             val qrCodeBitmap = generateQRCode(userData.getUid()!!)
             qrCodeImageView.setImageBitmap(qrCodeBitmap)

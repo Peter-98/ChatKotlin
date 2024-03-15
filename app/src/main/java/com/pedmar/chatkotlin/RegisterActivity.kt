@@ -188,7 +188,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun postCustomToken(uid: String, deviceId: String): String {
-        val customClaims = RegisterActivity.CustomClaims("admin", "premium")
+        val customClaims = CustomClaims("admin", "premium")
 
         val jsonBody = Json.encodeToString(customClaims)
         val jsonString = "{\"uid\":\"$uid\",\"customClaims\":$jsonBody}"

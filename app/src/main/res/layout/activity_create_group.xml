@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize">
 
             <TextView
-                android:text="Select the people to create the group"
+                android:text="Select people to create the group"
                 android:textColor="#ffff"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">

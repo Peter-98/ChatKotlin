@@ -67,6 +67,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var runnable: Runnable
 
     private val qrCodeWidthPixels = 750
+    private lateinit var deviceId: String
 
 
     @SuppressLint("HardwareIds")
@@ -84,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
 
 
-        val deviceId: String = Settings.Secure.getString(
+        deviceId = Settings.Secure.getString(
             applicationContext.contentResolver,
             Settings.Secure.ANDROID_ID
         )
@@ -232,8 +233,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
     }
-
-    @SuppressLint("HardwareIds")
     private fun checkGoogleFirebase(idToken: String?) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
@@ -241,20 +240,13 @@ class LoginActivity : AppCompatActivity() {
 
                 if (authResult.additionalUserInfo!!.isNewUser) {
                     /* Si el usuario es nuevo */
-
-
-                    val deviceId: String =
-                        Settings.Secure.getString(
-                            applicationContext.contentResolver,
-                            Settings.Secure.ANDROID_ID
-                        )
                     saveInfoBD()
                     saveDevice(deviceId)
                     postCustomToken(auth.uid!!, deviceId)
 
                 } else {
-                    getData()
                     /* Si el usuario ya se registro previamente */
+                    getData()
                     startActivity(Intent(this, MainActivity::class.java))
                     finishAffinity()
                 }
@@ -374,6 +366,7 @@ class LoginActivity : AppCompatActivity() {
         hashMap["idDevice"] = deviceId
         hashMap["uid"] = uid
         hashMap["enable"] = false
+        hashMap["userIdToken"] = token
         reference!!.updateChildren(hashMap)
     }
 
@@ -427,7 +420,7 @@ class LoginActivity : AppCompatActivity() {
         return properties.getProperty("secretKey")
     }
 
-    private fun saveDevice(deviceId: String){
+    private fun saveDevice(token: String){
 
         val reference =
             FirebaseDatabase.getInstance().reference.child(
@@ -438,6 +431,7 @@ class LoginActivity : AppCompatActivity() {
         hashMap["idDevice"] = deviceId
         hashMap["uid"] = auth.uid!!
         hashMap["enable"] = false
+        hashMap["userIdToken"] = token
         reference!!.updateChildren(hashMap)
 
     }

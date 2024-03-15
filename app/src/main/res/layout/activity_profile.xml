@@ -184,7 +184,7 @@
                 <EditText
                     android:id="@+id/P_location"
                     android:hint="@string/P_location"
-                    android:inputType="number"
+                    android:inputType="textPersonName|textCapWords"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
